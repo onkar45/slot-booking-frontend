@@ -3,6 +3,8 @@ import { AuthContext } from "../context/AuthContext";
 import API from "../services/api";
 import { useNavigate, Link } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast';
+import { FiMail, FiLock, FiLogIn, FiAlertCircle } from 'react-icons/fi';
+import PublicNavbar from "../components/PublicNavbar";
 
 function Login() {
   const { login } = useContext(AuthContext);
@@ -94,84 +96,111 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <PublicNavbar />
       <Toaster position="top-right" />
       
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        
-        {/* Title */}
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Slot Booking Login
-        </h2>
-
-        {/* Form */}
-        <form onSubmit={handleLogin} className="space-y-5">
+      <div className="flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
           
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                errors.email && touched.email
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-blue-500'
-              }`}
-              value={email}
-              onChange={handleEmailChange}
-              onBlur={() => handleBlur('email')}
-            />
-            {errors.email && touched.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-            )}
+          {/* Title */}
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+              <FiLogIn className="w-8 h-8 text-blue-600" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-800">
+              Slot Booking Login
+            </h2>
           </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                errors.password && touched.password
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-blue-500'
-              }`}
-              value={password}
-              onChange={handlePasswordChange}
-              onBlur={() => handleBlur('password')}
-            />
-            {errors.password && touched.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
-          </div>
+          {/* Form */}
+          <form onSubmit={handleLogin} className="space-y-5">
+            
+            {/* Email */}
+            <div>
+              <div className="relative">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className={`w-full px-4 py-2 pl-10 border rounded-lg focus:ring-2 focus:outline-none ${
+                    errors.email && touched.email
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'focus:ring-blue-500'
+                  }`}
+                  value={email}
+                  onChange={handleEmailChange}
+                  onBlur={() => handleBlur('email')}
+                />
+                <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              </div>
+              {errors.email && touched.email && (
+                <p className="text-red-500 text-sm mt-1 flex items-center">
+                  <FiAlertCircle className="w-4 h-4 mr-1" />
+                  {errors.email}
+                </p>
+              )}
+            </div>
 
-          {/* Button */}
-          <button
-            type="submit"
-            disabled={loading || !email || !password}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
+            {/* Password */}
+            <div>
+              <div className="relative">
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  className={`w-full px-4 py-2 pl-10 border rounded-lg focus:ring-2 focus:outline-none ${
+                    errors.password && touched.password
+                      ? 'border-red-500 focus:ring-red-500'
+                      : 'focus:ring-blue-500'
+                  }`}
+                  value={password}
+                  onChange={handlePasswordChange}
+                  onBlur={() => handleBlur('password')}
+                />
+                <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              </div>
+              {errors.password && touched.password && (
+                <p className="text-red-500 text-sm mt-1 flex items-center">
+                  <FiAlertCircle className="w-4 h-4 mr-1" />
+                  {errors.password}
+                </p>
+              )}
+            </div>
 
-        {/* Register Link */}
-        <p className="text-sm text-center text-gray-600 mt-6">
-          Don't have an account?{" "}
-          <Link
-            to="/register"
-            className="text-blue-600 font-medium hover:underline"
-          >
-            Register here
-          </Link>
-        </p>
+            {/* Button */}
+            <button
+              type="submit"
+              disabled={loading || !email || !password}
+              className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              {loading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Logging in...
+                </>
+              ) : (
+                <>
+                  <FiLogIn className="mr-2" />
+                  Login
+                </>
+              )}
+            </button>
+          </form>
 
+          {/* Register Link */}
+          <p className="text-sm text-center text-gray-600 mt-6">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="text-blue-600 font-medium hover:underline"
+            >
+              Register here
+            </Link>
+          </p>
+
+        </div>
       </div>
     </div>
   );

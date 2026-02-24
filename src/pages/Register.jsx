@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import API from "../services/api";
 import toast, { Toaster } from 'react-hot-toast';
+import { FiUser, FiMail, FiLock, FiUserPlus, FiAlertCircle } from 'react-icons/fi';
+import PublicNavbar from "../components/PublicNavbar";
 
 function Register() {
   const navigate = useNavigate();
@@ -89,7 +91,7 @@ function Register() {
     try {
       await API.post("/auth/register", formData);
       toast.success("Registration successful! Redirecting to login...");
-      setTimeout(() => navigate("/"), 1500);
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
       toast.error(err.response?.data?.detail || "Registration failed");
     } finally {
@@ -98,87 +100,104 @@ function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <PublicNavbar />
       <Toaster position="top-right" />
       
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+      <div className="flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
         
         {/* Title */}
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Create Account
-        </h2>
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+            <FiUserPlus className="w-8 h-8 text-green-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-800">
+            Create Account
+          </h2>
+        </div>
 
         {/* Form */}
         <form onSubmit={handleRegister} className="space-y-5">
 
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Full Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Enter your full name"
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                errors.name && touched.name
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-blue-500'
-              }`}
-              value={formData.name}
-              onChange={handleChange}
-              onBlur={() => handleBlur('name')}
-            />
+            <div className="relative">
+              <input
+                type="text"
+                name="name"
+                placeholder="Enter your full name"
+                className={`w-full px-4 py-2 pl-10 border rounded-lg focus:ring-2 focus:outline-none ${
+                  errors.name && touched.name
+                    ? 'border-red-500 focus:ring-red-500'
+                    : 'focus:ring-blue-500'
+                }`}
+                value={formData.name}
+                onChange={handleChange}
+                onBlur={() => handleBlur('name')}
+              />
+              <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            </div>
             {errors.name && touched.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              <p className="text-red-500 text-sm mt-1 flex items-center">
+                <FiAlertCircle className="w-4 h-4 mr-1" />
+                {errors.name}
+              </p>
             )}
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                errors.email && touched.email
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-blue-500'
-              }`}
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={() => handleBlur('email')}
-            />
+            <div className="relative">
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                className={`w-full px-4 py-2 pl-10 border rounded-lg focus:ring-2 focus:outline-none ${
+                  errors.email && touched.email
+                    ? 'border-red-500 focus:ring-red-500'
+                    : 'focus:ring-blue-500'
+                }`}
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={() => handleBlur('email')}
+              />
+              <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            </div>
             {errors.email && touched.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              <p className="text-red-500 text-sm mt-1 flex items-center">
+                <FiAlertCircle className="w-4 h-4 mr-1" />
+                {errors.email}
+              </p>
             )}
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Create a password"
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none ${
-                errors.password && touched.password
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'focus:ring-blue-500'
-              }`}
-              value={formData.password}
-              onChange={handleChange}
-              onBlur={() => handleBlur('password')}
-            />
+            <div className="relative">
+              <input
+                type="password"
+                name="password"
+                placeholder="Create a password"
+                className={`w-full px-4 py-2 pl-10 border rounded-lg focus:ring-2 focus:outline-none ${
+                  errors.password && touched.password
+                    ? 'border-red-500 focus:ring-red-500'
+                    : 'focus:ring-blue-500'
+                }`}
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={() => handleBlur('password')}
+              />
+              <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            </div>
             {errors.password && touched.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              <p className="text-red-500 text-sm mt-1 flex items-center">
+                <FiAlertCircle className="w-4 h-4 mr-1" />
+                {errors.password}
+              </p>
             )}
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 mt-1 flex items-center">
+              <FiAlertCircle className="w-3 h-3 mr-1" />
               Must contain uppercase, lowercase, and number
             </p>
           </div>
@@ -187,9 +206,22 @@ function Register() {
           <button
             type="submit"
             disabled={loading || !formData.name || !formData.email || !formData.password}
-            className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            {loading ? "Creating Account..." : "Register"}
+            {loading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating Account...
+              </>
+            ) : (
+              <>
+                <FiUserPlus className="mr-2" />
+                Register
+              </>
+            )}
           </button>
 
         </form>
@@ -198,7 +230,7 @@ function Register() {
         <p className="text-sm text-center text-gray-600 mt-6">
           Already have an account?{" "}
           <Link
-            to="/"
+            to="/login"
             className="text-blue-600 font-medium hover:underline"
           >
             Login here
@@ -206,6 +238,7 @@ function Register() {
         </p>
 
       </div>
+    </div>
     </div>
   );
 }

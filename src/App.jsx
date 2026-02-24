@@ -1,4 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import Home from "./pages/Home";          // NEW
+import About from "./pages/About";        // NEW
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import UserDashboard from "./pages/UserDashboard";
@@ -11,11 +15,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
+
+        {/* Public Pages */}
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* User Dashboard */}
+        {/* User Routes */}
         <Route
           path="/user"
           element={
@@ -25,7 +32,6 @@ function App() {
           }
         />
 
-        {/* My Bookings Page */}
         <Route
           path="/my-bookings"
           element={
@@ -35,7 +41,7 @@ function App() {
           }
         />
 
-        {/* Admin Dashboard */}
+        {/* Admin Routes */}
         <Route
           path="/admin"
           element={
@@ -53,6 +59,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
       </Routes>
     </BrowserRouter>
   );

@@ -506,11 +506,11 @@ function ManageSlots() {
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-600">
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center">
-                    <span className="text-xl mr-2">📅</span>
+                    <FiCalendar className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
                     <span className="font-medium text-gray-700 dark:text-gray-300">{selectedSlot.date}</span>
                   </div>
                   <div className="flex items-center">
-                    <span className="text-xl mr-2">⏰</span>
+                    <FiClock className="w-5 h-5 text-gray-600 dark:text-gray-400 mr-2" />
                     <span className="text-gray-600 dark:text-gray-400">{selectedSlot.start_time} - {selectedSlot.end_time}</span>
                   </div>
                 </div>
@@ -555,11 +555,11 @@ function ManageSlots() {
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-600">
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center">
-                    <span className="text-xl mr-2">📅</span>
+                    <FiCalendar className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
                     <span className="font-medium text-gray-700 dark:text-gray-300">{selectedSlot.date}</span>
                   </div>
                   <div className="flex items-center">
-                    <span className="text-xl mr-2">⏰</span>
+                    <FiClock className="w-5 h-5 text-gray-600 dark:text-gray-400 mr-2" />
                     <span className="text-gray-600 dark:text-gray-400">{selectedSlot.start_time} - {selectedSlot.end_time}</span>
                   </div>
                 </div>
@@ -655,7 +655,7 @@ function ManageSlots() {
           </div>
         ) : slots.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-12 text-center border border-gray-200 dark:border-gray-700">
-            <div className="text-6xl mb-4">📅</div>
+            <FiCalendar className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
             <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">No slots created yet.</p>
             <p className="text-gray-400 dark:text-gray-500 text-sm">Create your first slot to get started!</p>
           </div>
@@ -687,7 +687,7 @@ function ManageSlots() {
                       <tr key={slot.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 ${isPast ? 'opacity-60' : ''}`}>
                         <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <span className="text-lg sm:text-2xl mr-2 sm:mr-3">📅</span>
+                            <FiCalendar className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2 sm:mr-3" />
                             <div>
                               <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">
                                 {slot.date}
@@ -703,7 +703,7 @@ function ManageSlots() {
 
                         <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <span className="text-lg sm:text-2xl mr-2 sm:mr-3">⏰</span>
+                            <FiClock className="w-5 h-5 text-gray-600 dark:text-gray-400 mr-2 sm:mr-3" />
                             <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                               {slot.start_time} - {slot.end_time}
                             </span>

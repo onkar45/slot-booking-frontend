@@ -2,6 +2,7 @@ import { useState } from "react";
 import API from "../services/api";
 import AdminNavbar from "../components/AdminNavbar";
 import toast, { Toaster } from 'react-hot-toast';
+import { FiCalendar, FiClock, FiAlertCircle, FiPlus, FiInfo } from 'react-icons/fi';
 
 function CreateSlot() {
   const [formData, setFormData] = useState({
@@ -126,7 +127,7 @@ function CreateSlot() {
             {/* Date Field */}
             <div>
               <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                <span className="text-2xl mr-2">📅</span>
+                <FiCalendar className="mr-2 text-blue-600" />
                 Date
               </label>
               <input
@@ -143,9 +144,7 @@ function CreateSlot() {
               />
               {errors.date && touched.date && (
                 <p className="text-red-500 text-sm mt-1 flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
+                  <FiAlertCircle className="w-4 h-4 mr-1" />
                   {errors.date}
                 </p>
               )}
@@ -154,7 +153,7 @@ function CreateSlot() {
             {/* Start Time Field */}
             <div>
               <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                <span className="text-2xl mr-2">🕐</span>
+                <FiClock className="mr-2 text-blue-600" />
                 Start Time
               </label>
               <input
@@ -171,9 +170,7 @@ function CreateSlot() {
               />
               {errors.start_time && touched.start_time && (
                 <p className="text-red-500 text-sm mt-1 flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
+                  <FiAlertCircle className="w-4 h-4 mr-1" />
                   {errors.start_time}
                 </p>
               )}
@@ -182,7 +179,7 @@ function CreateSlot() {
             {/* End Time Field */}
             <div>
               <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                <span className="text-2xl mr-2">🕐</span>
+                <FiClock className="mr-2 text-blue-600" />
                 End Time
               </label>
               <input
@@ -199,9 +196,7 @@ function CreateSlot() {
               />
               {errors.end_time && touched.end_time && (
                 <p className="text-red-500 text-sm mt-1 flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
+                  <FiAlertCircle className="w-4 h-4 mr-1" />
                   {errors.end_time}
                 </p>
               )}
@@ -223,9 +218,7 @@ function CreateSlot() {
                 </>
               ) : (
                 <>
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                  </svg>
+                  <FiPlus className="w-5 h-5 mr-2" />
                   Create Slot
                 </>
               )}
@@ -235,9 +228,7 @@ function CreateSlot() {
           {/* Info Box */}
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-start">
-              <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
+              <FiInfo className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium text-blue-800">Quick Tip</p>
                 <p className="text-sm text-blue-700 mt-1">
