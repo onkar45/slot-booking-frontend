@@ -21,7 +21,6 @@ function AdminDashboard() {
     try {
       const res = await API.get('/bookings');
       setBookings(res.data);
-      console.log(res.data);
     } catch (err) {
       console.error('Error fetching bookings:', err);
     } finally {

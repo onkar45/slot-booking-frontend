@@ -4,12 +4,12 @@ import Home from "./pages/Home";          // NEW
 import About from "./pages/About";        // NEW
 
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MyBookings from "./pages/MyBookings";
 import ManageSlots from "./pages/ManageSlots";
+import AdminUsers from "./pages/AdminUsers";
 
 function App() {
   return (
@@ -20,7 +20,6 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
 
         {/* User Routes */}
         <Route
@@ -56,6 +55,15 @@ function App() {
           element={
             <ProtectedRoute allowedRole="admin">
               <ManageSlots />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute allowedRole="admin">
+              <AdminUsers />
             </ProtectedRoute>
           }
         />

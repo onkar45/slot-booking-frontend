@@ -1,5 +1,6 @@
 import PublicNavbar from "../components/PublicNavbar";
 import WeeklyCalendar from "../components/WeeklyCalendar";
+import toast, { Toaster } from 'react-hot-toast';
 import { FiCalendar, FiClock, FiCheckCircle, FiUsers, FiTrendingUp, FiShield } from 'react-icons/fi';
 
 function Home() {
@@ -37,7 +38,8 @@ function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+      <Toaster position="top-right" />
       <PublicNavbar />
 
       {/* Hero Section */}
@@ -46,19 +48,19 @@ function Home() {
 
           {/* Left Section */}
           <div className="lg:col-span-2 space-y-6 sm:space-y-8 lg:pt-8">
-            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full text-sm font-semibold shadow-sm">
+            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold shadow-sm">
               <FiTrendingUp className="mr-2" />
               Smart Booking Solution
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight">
               Simplify Your
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mt-2">
                 Slot Booking
               </span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-xl">
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed max-w-xl">
               Streamline your scheduling process with our intelligent booking platform. 
               Manage time slots, approve bookings, and organize schedules effortlessly.
             </p>
@@ -80,25 +82,25 @@ function Home() {
 
               <a
                 href="/about"
-                className="inline-flex items-center justify-center border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl hover:bg-white hover:border-blue-300 hover:text-blue-600 transition-all duration-300 font-semibold text-lg shadow-sm hover:shadow-md"
+                className="inline-flex items-center justify-center border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 px-8 py-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-blue-300 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 font-semibold text-lg shadow-sm hover:shadow-md"
               >
                 Learn More
               </a>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
+            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-700">
               <div className="text-center">
                 <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">99%</div>
-                <div className="text-sm text-gray-600 mt-1">Uptime</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Uptime</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">24/7</div>
-                <div className="text-sm text-gray-600 mt-1">Support</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Support</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Fast</div>
-                <div className="text-sm text-gray-600 mt-1">Setup</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Setup</div>
               </div>
             </div>
           </div>
@@ -106,34 +108,34 @@ function Home() {
           {/* Right Section - Weekly Calendar */}
           <div id="calendar-section" className="lg:col-span-3 relative scroll-mt-20">
             <div className="absolute -inset-4 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 rounded-3xl opacity-20 blur-3xl"></div>
-            <div className="relative bg-white/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-2xl border border-white/50">
+            <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-2xl border border-white/50 dark:border-gray-700/50">
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Available Time Slots</h3>
-                <p className="text-sm text-gray-600">View and select available booking slots for the next 15 days</p>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Available Time Slots</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">View and select available booking slots for the next 15 days</p>
               </div>
               <div className="calendar-wrapper-large">
                 <WeeklyCalendar />
               </div>
-              <div className="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100/50 shadow-sm">
+              <div className="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100/50 dark:border-blue-800/50 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-sm font-bold text-gray-800 flex items-center">
+                  <p className="text-sm font-bold text-gray-800 dark:text-gray-200 flex items-center">
                     <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
                     Legend:
                   </p>
                   <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center text-xs text-gray-700">
+                    <div className="flex items-center text-xs text-gray-700 dark:text-gray-300">
                       <div className="w-3 h-3 rounded-sm mr-1.5 shadow-sm" style={{ backgroundColor: '#22c55e' }}></div>
                       <span className="font-medium">Available</span>
                     </div>
-                    <div className="flex items-center text-xs text-gray-700">
+                    <div className="flex items-center text-xs text-gray-700 dark:text-gray-300">
                       <div className="w-3 h-3 rounded-sm mr-1.5 shadow-sm" style={{ backgroundColor: '#eab308' }}></div>
                       <span className="font-medium">Reserved</span>
                     </div>
-                    <div className="flex items-center text-xs text-gray-700">
+                    <div className="flex items-center text-xs text-gray-700 dark:text-gray-300">
                       <div className="w-3 h-3 rounded-sm mr-1.5 shadow-sm" style={{ backgroundColor: '#ef4444' }}></div>
                       <span className="font-medium">Booked</span>
                     </div>
-                    <div className="flex items-center text-xs text-gray-700">
+                    <div className="flex items-center text-xs text-gray-700 dark:text-gray-300">
                       <div className="w-3 h-3 rounded-sm mr-1.5 shadow-sm" style={{ backgroundColor: '#6b7280' }}></div>
                       <span className="font-medium">Inactive</span>
                     </div>
@@ -147,13 +149,13 @@ function Home() {
       </div>
 
       {/* Features Section */}
-      <div className="bg-white/50 backdrop-blur-sm py-16 sm:py-24 border-y border-gray-200/50">
+      <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm py-16 sm:py-24 border-y border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Everything You Need
             </h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Powerful features designed to make booking management simple and efficient
             </p>
           </div>
@@ -162,17 +164,17 @@ function Home() {
             {features.map((feature, index) => (
               <div 
                 key={index}
-                className="group relative p-8 bg-white rounded-2xl hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-blue-200 overflow-hidden"
+                className="group relative p-8 bg-white dark:bg-gray-800 rounded-2xl hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-800 overflow-hidden"
               >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-md">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-md">
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -191,13 +193,13 @@ function Home() {
             Ready to Get Started?
           </h2>
           <p className="text-lg sm:text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-            Join thousands of users who trust our platform for their booking needs
+            Contact your administrator to get access to our booking platform
           </p>
           <a
-            href="/register"
+            href="/login"
             className="inline-flex items-center justify-center bg-white text-blue-600 px-10 py-5 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-3xl font-bold text-lg transform hover:-translate-y-1"
           >
-            Create Free Account
+            Go to Login
             <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>

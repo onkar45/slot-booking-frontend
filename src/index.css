@@ -65,6 +65,10 @@
   border: none !important;
 }
 
+.dark .fc {
+  background: rgb(31 41 55);
+}
+
 /* Toolbar Styling */
 .fc .fc-toolbar {
   padding: 1.25rem 1.5rem;
@@ -73,11 +77,20 @@
   margin-bottom: 0 !important;
 }
 
+.dark .fc .fc-toolbar {
+  background: linear-gradient(135deg, rgb(31 41 55) 0%, rgb(17 24 39) 100%);
+  border-bottom: 1px solid rgb(55 65 81);
+}
+
 .fc .fc-toolbar-title {
   font-size: 1.375rem;
   font-weight: 700;
   color: #1e293b;
   letter-spacing: -0.025em;
+}
+
+.dark .fc .fc-toolbar-title {
+  color: rgb(243 244 246);
 }
 
 /* Button Styling */
@@ -124,6 +137,11 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
+.dark .fc .fc-col-header {
+  background: linear-gradient(135deg, rgb(31 41 55) 0%, rgb(17 24 39) 100%);
+  border-bottom: 1px solid rgb(55 65 81);
+}
+
 .fc .fc-col-header-cell {
   padding: 1rem 0.5rem;
   font-weight: 600;
@@ -132,6 +150,11 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-color: #e2e8f0 !important;
+}
+
+.dark .fc .fc-col-header-cell {
+  color: rgb(156 163 175);
+  border-color: rgb(55 65 81) !important;
 }
 
 .fc .fc-col-header-cell-cushion {
@@ -146,8 +169,17 @@
   border-color: #f1f5f9;
 }
 
+.dark .fc-theme-standard td,
+.dark .fc-theme-standard th {
+  border-color: rgb(55 65 81);
+}
+
 .fc-theme-standard .fc-scrollgrid {
   border-color: #e2e8f0;
+}
+
+.dark .fc-theme-standard .fc-scrollgrid {
+  border-color: rgb(55 65 81);
 }
 
 /* Remove the gray divider column completely */
@@ -187,8 +219,16 @@
   border-color: #f8fafc;
 }
 
+.dark .fc-timegrid-slot {
+  border-color: rgb(55 65 81);
+}
+
 .fc-timegrid-slot:hover {
   background-color: #f8fafc;
+}
+
+.dark .fc-timegrid-slot:hover {
+  background-color: rgb(55 65 81);
 }
 
 .fc .fc-timegrid-slot-label {
@@ -198,6 +238,10 @@
   padding: 0 1rem;
   text-transform: uppercase;
   letter-spacing: 0.025em;
+}
+
+.dark .fc .fc-timegrid-slot-label {
+  color: rgb(156 163 175);
 }
 
 /* Current Time Indicator */
@@ -276,14 +320,27 @@
   border-left: 3px solid #2563eb !important;
 }
 
+.dark .fc .current-day-highlight {
+  background-color: rgb(30 58 138 / 0.2) !important;
+  border-left: 3px solid #3b82f6 !important;
+}
+
 .fc .current-day-highlight .fc-col-header-cell-cushion {
   color: #2563eb !important;
   font-weight: 800 !important;
   font-size: 0.9375rem !important;
 }
 
+.dark .fc .current-day-highlight .fc-col-header-cell-cushion {
+  color: #60a5fa !important;
+}
+
 .fc .current-day-highlight .fc-timegrid-col-frame {
   background: linear-gradient(to bottom, rgba(239, 246, 255, 0.4), rgba(239, 246, 255, 0.1)) !important;
+}
+
+.dark .fc .current-day-highlight .fc-timegrid-col-frame {
+  background: linear-gradient(to bottom, rgba(30, 58, 138, 0.3), rgba(30, 58, 138, 0.1)) !important;
 }
 
 /* Past dates disabled */
@@ -313,13 +370,25 @@
   border-radius: 5px;
 }
 
+.dark .fc-scroller::-webkit-scrollbar-track {
+  background: rgb(31 41 55);
+}
+
 .fc-scroller::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 5px;
 }
 
+.dark .fc-scroller::-webkit-scrollbar-thumb {
+  background: rgb(75 85 99);
+}
+
 .fc-scroller::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+.dark .fc-scroller::-webkit-scrollbar-thumb:hover {
+  background: rgb(107 114 128);
 }
 
 /* Today Highlight */
@@ -327,9 +396,17 @@
   background-color: #eff6ff !important;
 }
 
+.dark .fc .fc-day-today {
+  background-color: rgb(30 58 138 / 0.2) !important;
+}
+
 .fc .fc-day-today .fc-col-header-cell-cushion {
   color: #2563eb;
   font-weight: 700;
+}
+
+.dark .fc .fc-day-today .fc-col-header-cell-cushion {
+  color: #60a5fa;
 }
 
 /* Responsive Adjustments */

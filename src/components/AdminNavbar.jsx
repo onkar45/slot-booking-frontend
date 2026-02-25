@@ -11,12 +11,6 @@ function AdminNavbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Debug: Check user data in detail
-  console.log('Admin Navbar - User data:', user, 'Role:', role);
-  console.log('Admin Navbar - User.name:', user?.name);
-  console.log('Admin Navbar - User.email:', user?.email);
-  console.log('Admin Navbar - User keys:', user ? Object.keys(user) : 'no user');
-
   const handleLogout = () => {
     logout();
     toast.success('Logged out successfully!');
@@ -26,7 +20,7 @@ function AdminNavbar() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="bg-gray-900 dark:bg-gray-950 text-white px-4 sm:px-8 py-4 shadow-lg transition-colors duration-200">
+    <nav className="sticky top-0 z-50 bg-gray-900 dark:bg-gray-950 text-white px-4 sm:px-8 py-4 shadow-lg transition-colors duration-200">
       <div className="flex justify-between items-center">
         <h1 className="text-xl sm:text-2xl font-bold tracking-wide">
           Admin Panel
@@ -54,6 +48,17 @@ function AdminNavbar() {
           >
             <span className="hidden sm:inline">Manage Slots</span>
             <span className="sm:hidden">Slots</span>
+          </Link>
+
+          <Link
+            to="/admin/users"
+            className={`text-sm sm:text-lg font-medium transition-colors ${
+              isActive('/admin/users')
+                ? 'text-blue-400 border-b-2 border-blue-400'
+                : 'text-gray-300 hover:text-blue-400'
+            }`}
+          >
+            Users
           </Link>
 
           <button

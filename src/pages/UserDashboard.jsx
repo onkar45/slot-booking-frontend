@@ -254,76 +254,62 @@ function UserDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
       <Toaster position="top-right" />
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <h2 className="text-2xl sm:text-3xl font-semibold text-gray-700 dark:text-gray-200 mb-6">
-          Available Slots
-        </h2>
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">Available Slots</h2>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Browse and book available time slots</p>
+        </div>
 
-        {/* Enhanced Summary Section */}
-        <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-700 rounded-2xl p-6 shadow-lg border border-blue-100 dark:border-gray-600">
-          <div className="flex flex-wrap items-center gap-6 sm:gap-8">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-blue-500 rounded-xl flex items-center justify-center shadow-md">
-                <FiCalendar className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{totalAvailable}</p>
-                <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">Total Available Slots</p>
-              </div>
-            </div>
-            <div className="hidden sm:block w-px h-14 bg-gray-300 dark:bg-gray-600"></div>
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-green-500 rounded-xl flex items-center justify-center shadow-md">
-                <FiCheckCircle className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{activeBookingsCount}</p>
-                <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">Your Active Bookings</p>
-              </div>
-            </div>
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Available Slots</p>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">{totalAvailable}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Your Active Bookings</p>
+            <p className="text-2xl sm:text-3xl font-bold text-green-600">{activeBookingsCount}</p>
           </div>
         </div>
 
         {/* Filter Buttons */}
-        <div className="mb-6 flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-            <FiFilter className="w-5 h-5" />
-            <span className="font-semibold">Filter:</span>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 mb-6 border border-gray-200 dark:border-gray-700">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setFilter('all')}
+              className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors duration-200 ${
+                filter === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setFilter('available')}
+              className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors duration-200 ${
+                filter === 'available'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              Available
+            </button>
+            <button
+              onClick={() => setFilter('booked')}
+              className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors duration-200 ${
+                filter === 'booked'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              Booked
+            </button>
           </div>
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              filter === 'all'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setFilter('available')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              filter === 'available'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            Available
-          </button>
-          <button
-            onClick={() => setFilter('booked')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              filter === 'booked'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            Booked
-          </button>
         </div>
 
         {loading ? (
@@ -334,20 +320,20 @@ function UserDashboard() {
             </div>
           </div>
         ) : filteredSlots.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-12 text-center border border-gray-100 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 sm:p-8 text-center border border-gray-200 dark:border-gray-700">
             <FiAlertCircle className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400 text-lg">No slots available at the moment.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg">No slots available at the moment.</p>
           </div>
         ) : (
           <div className="space-y-8">
             {sortedDates.map((date) => (
               <div key={date}>
                 {/* Date Heading with TODAY badge */}
-                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-3">
-                  <FiCalendar className="text-blue-600 dark:text-blue-400" />
+                <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-3">
+                  <FiCalendar className="text-blue-600 dark:text-blue-400 w-5 h-5" />
                   {formatDate(date)}
                   {isToday(date) && (
-                    <span className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
+                    <span className="px-2 sm:px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
                       TODAY
                     </span>
                   )}
@@ -363,14 +349,14 @@ function UserDashboard() {
                     return (
                       <div
                         key={slot.id}
-                        className={`bg-white dark:bg-gray-800 rounded-2xl shadow-md transition-all duration-200 p-5 border ${
+                        className={`bg-white dark:bg-gray-800 rounded-xl shadow-md transition-all duration-200 p-4 sm:p-5 border ${
                           userBooked 
                             ? 'border-red-300 dark:border-red-700' 
-                            : 'border-gray-100 dark:border-gray-700'
+                            : 'border-gray-200 dark:border-gray-700'
                         } ${
                           isExpired 
                             ? 'opacity-50' 
-                            : 'hover:shadow-xl hover:scale-103'
+                            : 'hover:shadow-lg'
                         }`}
                       >
                         <div className="space-y-3 mb-4">

@@ -5,6 +5,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import API from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 function WeeklyCalendar() {
   const [events, setEvents] = useState([]);
@@ -155,19 +156,48 @@ function WeeklyCalendar() {
 
     // If slot is available and user is not logged in, redirect to login
     if (status === 'available' && !isBooked && !isLoggedIn) {
-      if (confirm(`This slot is available!\n\nDate: ${slotDate}\nTime: ${startTime} - ${endTime}\n\nYou need to login to book this slot. Redirect to login page?`)) {
+      toast('Please login to book this slot', {
+        duration: 2000,
+        icon: '🔐',
+        style: {
+          background: '#3b82f6',
+          color: '#fff',
+        },
+      });
+      setTimeout(() => {
         navigate('/login');
-      }
+      }, 800);
       return;
     }
     
     // Show slot details for logged-in users
     if (status === 'available' && isActive && !isBooked) {
-      alert(`Available Slot\n\nDate: ${slotDate}\nTime: ${startTime} - ${endTime}\n\nPlease proceed to book this slot.`);
+      toast(`Available Slot\n\nDate: ${slotDate}\nTime: ${startTime} - ${endTime}\n\nPlease proceed to book this slot.`, {
+        duration: 3000,
+        icon: '✅',
+        style: {
+          background: '#22c55e',
+          color: '#fff',
+        },
+      });
     } else if (status === 'booked' || isBooked) {
-      alert(`This slot is already booked.\n\nDate: ${slotDate}\nTime: ${startTime} - ${endTime}`);
+      toast(`This slot is already booked.\n\nDate: ${slotDate}\nTime: ${startTime} - ${endTime}`, {
+        duration: 3000,
+        icon: '❌',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+        },
+      });
     } else if (status === 'pending') {
-      alert(`This slot is reserved (pending approval).\n\nDate: ${slotDate}\nTime: ${startTime} - ${endTime}`);
+      toast(`This slot is reserved (pending approval).\n\nDate: ${slotDate}\nTime: ${startTime} - ${endTime}`, {
+        duration: 3000,
+        icon: '⏳',
+        style: {
+          background: '#eab308',
+          color: '#fff',
+        },
+      });
     }
   };
 
@@ -227,26 +257,26 @@ function WeeklyCalendar() {
       {/* Stats Summary - Inline */}
       <div className="mb-4 flex flex-wrap items-center justify-center gap-4 text-sm">
         <div className="flex items-center gap-2">
-          <span className="text-gray-600">Total:</span>
-          <span className="font-bold text-gray-900">{stats.total}</span>
+          <span className="text-gray-600 dark:text-gray-400">Total:</span>
+          <span className="font-bold text-gray-900 dark:text-gray-100">{stats.total}</span>
         </div>
-        <div className="w-px h-4 bg-gray-300"></div>
+        <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-green-500"></span>
-          <span className="text-gray-600">Available:</span>
-          <span className="font-bold text-green-600">{stats.available}</span>
+          <span className="text-gray-600 dark:text-gray-400">Available:</span>
+          <span className="font-bold text-green-600 dark:text-green-400">{stats.available}</span>
         </div>
-        <div className="w-px h-4 bg-gray-300"></div>
+        <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
-          <span className="text-gray-600">Reserved:</span>
-          <span className="font-bold text-yellow-600">{stats.reserved}</span>
+          <span className="text-gray-600 dark:text-gray-400">Reserved:</span>
+          <span className="font-bold text-yellow-600 dark:text-yellow-400">{stats.reserved}</span>
         </div>
-        <div className="w-px h-4 bg-gray-300"></div>
+        <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-red-500"></span>
-          <span className="text-gray-600">Booked:</span>
-          <span className="font-bold text-red-600">{stats.booked}</span>
+          <span className="text-gray-600 dark:text-gray-400">Booked:</span>
+          <span className="font-bold text-red-600 dark:text-red-400">{stats.booked}</span>
         </div>
       </div>
 
@@ -309,14 +339,6 @@ function WeeklyCalendar() {
             </div>
           );
         }}
-        noEventsContent={() => (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="text-gray-400 text-4xl mb-2">📅</div>
-              <p className="text-gray-600 font-medium">No slots available for this date</p>
-            </div>
-          </div>
-        )}
       />
     </div>
   );
