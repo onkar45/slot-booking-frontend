@@ -1,9 +1,27 @@
+import { useState } from 'react';
 import PublicNavbar from "../components/PublicNavbar";
-import WeeklyCalendar from "../components/WeeklyCalendar";
+import CustomCalendar from "../components/CustomCalendar";
+import PreLoginBookingModal from "../components/PreLoginBookingModal";
 import toast, { Toaster } from 'react-hot-toast';
 import { FiCalendar, FiClock, FiCheckCircle, FiUsers, FiTrendingUp, FiShield } from 'react-icons/fi';
 
 function Home() {
+  const [showPreLoginModal, setShowPreLoginModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
+
+  const handleOpenBookingModal = (date, time) => {
+    setSelectedDate(date);
+    setSelectedTime(time);
+    setShowPreLoginModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowPreLoginModal(false);
+    setSelectedDate(null);
+    setSelectedTime(null);
+  };
+
   const features = [
     {
       icon: <FiCalendar className="w-8 h-8" />,
@@ -38,143 +56,112 @@ function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       <Toaster position="top-right" />
       <PublicNavbar />
 
       {/* Hero Section */}
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
-        <div className="grid lg:grid-cols-5 gap-8 lg:gap-12 items-start">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid lg:grid-cols-12 gap-8 items-stretch">
 
-          {/* Left Section */}
-          <div className="lg:col-span-2 space-y-6 sm:space-y-8 lg:pt-8">
-            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold shadow-sm">
-              <FiTrendingUp className="mr-2" />
-              Smart Booking Solution
+          {/* Left Section - No Card, Just Content */}
+          <div className="lg:col-span-3 flex flex-col justify-between p-8 ml-8">
+            <div className="space-y-6">
+              <div className="inline-flex items-center px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full text-xs font-semibold shadow-sm border border-blue-200 dark:border-blue-800">
+                <FiTrendingUp className="mr-1.5 w-3.5 h-3.5" />
+                Smart Booking Solution
+              </div>
+
+              <div>
+                <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-2">
+                  Simplify Your
+                </h1>
+                <h1 className="text-4xl sm:text-5xl font-extrabold text-blue-600 dark:text-blue-400 leading-tight">
+                  Slot Booking
+                </h1>
+              </div>
+
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                Streamline your scheduling process with our intelligent booking platform. 
+                Manage time slots, approve bookings, and organize schedules effortlessly.
+              </p>
+
+              <div className="flex flex-col gap-3 pt-2">
+                <a
+                  href="#calendar-section"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('calendar-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className="group inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all duration-200 font-semibold text-sm shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  Get Started
+                  <svg className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </a>
+
+                <a
+                  href="/about"
+                  className="inline-flex items-center justify-center border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-6 py-3 rounded-xl hover:bg-white dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200 font-semibold text-sm shadow-sm"
+                >
+                  Learn More
+                </a>
+              </div>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight">
-              Simplify Your
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mt-2">
-                Slot Booking
-              </span>
-            </h1>
-
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 leading-relaxed max-w-xl">
-              Streamline your scheduling process with our intelligent booking platform. 
-              Manage time slots, approve bookings, and organize schedules effortlessly.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <a
-                href="#calendar-section"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('calendar-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
-                className="group inline-flex items-center justify-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl font-semibold text-lg transform hover:-translate-y-0.5"
-              >
-                Get Started
-                <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </a>
-
-              <a
-                href="/about"
-                className="inline-flex items-center justify-center border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 px-8 py-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-blue-300 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 font-semibold text-lg shadow-sm hover:shadow-md"
-              >
-                Learn More
-              </a>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200 dark:border-gray-700">
+            {/* Stats - Bottom aligned */}
+            <div className="grid grid-cols-3 gap-6 pt-8 mt-6 border-t border-gray-300 dark:border-gray-700">
               <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">99%</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Uptime</div>
+                <div className="text-3xl font-extrabold text-blue-600 dark:text-blue-400">99%</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">Uptime</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">24/7</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Support</div>
+                <div className="text-3xl font-extrabold text-blue-600 dark:text-blue-400">24/7</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">Support</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Fast</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Setup</div>
+                <div className="text-3xl font-extrabold text-blue-600 dark:text-blue-400">Fast</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">Setup</div>
               </div>
             </div>
           </div>
 
-          {/* Right Section - Weekly Calendar */}
-          <div id="calendar-section" className="lg:col-span-3 relative scroll-mt-20">
-            <div className="absolute -inset-4 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 rounded-3xl opacity-20 blur-3xl"></div>
-            <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-2xl border border-white/50 dark:border-gray-700/50">
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Available Time Slots</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">View and select available booking slots for the next 15 days</p>
-              </div>
-              <div className="calendar-wrapper-large">
-                <WeeklyCalendar />
-              </div>
-              <div className="mt-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100/50 dark:border-blue-800/50 shadow-sm">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-sm font-bold text-gray-800 dark:text-gray-200 flex items-center">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
-                    Legend:
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center text-xs text-gray-700 dark:text-gray-300">
-                      <div className="w-3 h-3 rounded-sm mr-1.5 shadow-sm" style={{ backgroundColor: '#22c55e' }}></div>
-                      <span className="font-medium">Available</span>
-                    </div>
-                    <div className="flex items-center text-xs text-gray-700 dark:text-gray-300">
-                      <div className="w-3 h-3 rounded-sm mr-1.5 shadow-sm" style={{ backgroundColor: '#eab308' }}></div>
-                      <span className="font-medium">Reserved</span>
-                    </div>
-                    <div className="flex items-center text-xs text-gray-700 dark:text-gray-300">
-                      <div className="w-3 h-3 rounded-sm mr-1.5 shadow-sm" style={{ backgroundColor: '#ef4444' }}></div>
-                      <span className="font-medium">Booked</span>
-                    </div>
-                    <div className="flex items-center text-xs text-gray-700 dark:text-gray-300">
-                      <div className="w-3 h-3 rounded-sm mr-1.5 shadow-sm" style={{ backgroundColor: '#6b7280' }}></div>
-                      <span className="font-medium">Inactive</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Right Section - Calendar - Increased width */}
+          <div id="calendar-section" className="lg:col-span-9 scroll-mt-16 mr-8">
+            <CustomCalendar onOpenBookingModal={handleOpenBookingModal} />
           </div>
 
         </div>
       </div>
 
       {/* Features Section */}
-      <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm py-16 sm:py-24 border-y border-gray-200/50 dark:border-gray-700/50">
+      <div className="bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 py-20 sm:py-28 border-y border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
               Everything You Need
             </h2>
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Powerful features designed to make booking management simple and efficient
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <div 
                 key={index}
-                className="group relative p-8 bg-white dark:bg-gray-800 rounded-2xl hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-800 overflow-hidden"
+                className="group relative p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 overflow-hidden transform hover:-translate-y-1"
               >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-full -mr-20 -mt-20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-md">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg">
                     {feature.icon}
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -185,19 +172,19 @@ function Home() {
       </div>
 
       {/* CTA Section */}
-      <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-16 sm:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white/10"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+      <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-20 sm:py-28 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDQgMS43OSA0IDQgNCA0LTEuNzkgNC00em0wLTEwYzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMC0xMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-5xl font-bold text-white mb-6">
+          <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-6 drop-shadow-lg">
             Ready to Get Started?
           </h2>
-          <p className="text-lg sm:text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-blue-50 mb-12 max-w-2xl mx-auto drop-shadow">
             Contact your administrator to get access to our booking platform
           </p>
           <a
             href="/login"
-            className="inline-flex items-center justify-center bg-white text-blue-600 px-10 py-5 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-3xl font-bold text-lg transform hover:-translate-y-1"
+            className="inline-flex items-center justify-center bg-white text-blue-600 px-10 py-5 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-3xl font-bold text-lg transform hover:-translate-y-1 hover:scale-105"
           >
             Go to Login
             <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,11 +195,19 @@ function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-8">
+      <footer className="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm">&copy; 2026 Slot Booking System. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* Pre-Login Booking Modal */}
+      <PreLoginBookingModal
+        isOpen={showPreLoginModal}
+        onClose={handleCloseModal}
+        selectedDate={selectedDate}
+        selectedTime={selectedTime}
+      />
 
     </div>
   );

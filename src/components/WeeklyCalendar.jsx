@@ -1,224 +1,250 @@
 import { useEffect, useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import API from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { FiClock, FiCalendar, FiPlus } from 'react-icons/fi';
 
-function WeeklyCalendar() {
+function WeeklyCalendar({ onOpenBookingModal }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [stats, setStats] = useState({ total: 0, available: 0, reserved: 0, booked: 0 });
-  const navigate = useNavigate();
-  const { role } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const isLoggedIn = !!localStorage.getItem('token');
 
-  // Calculate date range: today to today + 15 days (in local timezone)
+  // Date range: TODAY + next 15 days
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const todayDateString = today.toISOString().split('T')[0];
   
   const endDate = new Date(today);
-  endDate.setDate(endDate.getDate() + 15);
-  const endDateString = endDate.toISOString().split('T')[0];
+  endDate.setDate(today.getDate() + 15);
+  endDate.setHours(23, 59, 59, 999);
+
+  const todayStr = formatDate(today);
+  const endDateStr = formatDate(endDate);
 
   useEffect(() => {
-    fetchSlots();
+    fetchBookingsAndGenerateSlots();
     
-    // Auto-refresh every 5 minutes to update expired slots
+    // Auto-refresh every 5 minutes
     const intervalId = setInterval(() => {
-      fetchSlots();
+      fetchBookingsAndGenerateSlots();
     }, 5 * 60 * 1000);
     
     return () => clearInterval(intervalId);
   }, []);
 
-  const fetchSlots = async () => {
+  /**
+   * Format date to YYYY-MM-DD
+   */
+  function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /**
+   * Convert 24-hour time to 12-hour format for display
+   * @param {string} time24 - Time in HH:MM:SS format
+   * @returns {string} - Time in 12-hour format (e.g., "9:00 AM")
+   */
+  function formatTo12Hour(time24) {
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  }
+
+  /**
+   * Check if a datetime is in the past
+   */
+  function isPastSlot(dateStr, timeStr) {
+    const slotDateTime = new Date(`${dateStr}T${timeStr}`);
+    const now = new Date();
+    return slotDateTime < now;
+  }
+
+  /**
+   * Main function to fetch bookings and generate calendar slots
+   */
+  async function fetchBookingsAndGenerateSlots() {
     try {
       setLoading(true);
       setError(null);
-      const res = await API.get('/slots/public');
+
+      // Step 1: Fetch approved bookings from backend
+      const response = await API.get('/bookings/approved-public');
+      const approvedBookings = response.data || [];
       
-      // Filter slots within the valid range (today to today + 15 days)
-      const validSlots = res.data.filter(slot => {
-        return slot.date >= todayDateString && slot.date <= endDateString;
+      console.log('📥 Fetched approved bookings:', approvedBookings.length);
+
+      // Step 2: Build a Map for quick lookup
+      // Key format: "YYYY-MM-DD_HH:MM:SS"
+      const approvedBookingsMap = new Map();
+      
+      approvedBookings.forEach(booking => {
+        const key = `${booking.booking_date}_${booking.start_time}`;
+        approvedBookingsMap.set(key, true);
       });
 
-      // Calculate stats
-      let availableCount = 0;
-      let reservedCount = 0;
-      let bookedCount = 0;
+      console.log('🗺️ Bookings map created with', approvedBookingsMap.size, 'entries');
 
-      // Convert slots to FullCalendar events with color coding
-      const calendarEvents = validSlots.map(slot => {
-        let backgroundColor, borderColor, textColor, title, tooltip;
-        
-        // Check if slot time has passed
-        const slotDateTime = new Date(`${slot.date}T${slot.end_time}`);
-        const now = new Date();
-        const isPast = slotDateTime < now;
-        
-        // Determine color based on slot status from backend
-        const status = slot.status || 'inactive';
-        
-        if (isPast) {
-          // Past slot - Lighter Gray
-          backgroundColor = '#9ca3af';
-          borderColor = '#6b7280';
-          textColor = '#ffffff';
-          title = 'Expired';
-          tooltip = 'This slot has expired';
-        } else if (status === 'booked' || slot.is_booked) {
-          // Booked slot - Red
-          backgroundColor = '#ef4444';
-          borderColor = '#dc2626';
-          textColor = '#ffffff';
-          title = 'Booked';
-          tooltip = 'Already booked';
-          bookedCount++;
-        } else if (status === 'pending') {
-          // Reserved/Pending slot - Yellow
-          backgroundColor = '#eab308';
-          borderColor = '#ca8a04';
-          textColor = '#ffffff';
-          title = 'Reserved';
-          tooltip = 'Awaiting approval';
-          reservedCount++;
-        } else if (status === 'available' && slot.is_active) {
-          // Available slot - Green
-          backgroundColor = '#22c55e';
-          borderColor = '#16a34a';
-          textColor = '#ffffff';
-          title = 'Available';
-          tooltip = 'Click to book this slot';
-          availableCount++;
-        } else {
-          // Inactive slot - Gray
-          backgroundColor = '#6b7280';
-          borderColor = '#4b5563';
-          textColor = '#ffffff';
-          title = 'Inactive';
-          tooltip = 'Not available';
-        }
+      // Step 3: Generate calendar slots for TODAY + next 15 days
+      const allEvents = [];
+      const now = new Date();
 
-        return {
-          id: slot.id,
-          title: `${title}`,
-          start: `${slot.date}T${slot.start_time}`,
-          end: `${slot.date}T${slot.end_time}`,
-          backgroundColor,
-          borderColor,
-          textColor,
-          classNames: [
-            isPast || !slot.is_active ? 'expired-slot' : 'active-slot',
-            status === 'available' && slot.is_active && !isPast ? 'available-slot' : ''
-          ],
-          extendedProps: {
-            slotId: slot.id,
-            isActive: slot.is_active && !isPast,
-            isBooked: slot.is_booked,
-            status: isPast ? 'expired' : status,
-            startTime: slot.start_time,
-            endTime: slot.end_time,
-            isPast: isPast,
-            tooltip: tooltip
+      // Loop through each day from today to today + 15 days
+      for (let dayOffset = 0; dayOffset <= 15; dayOffset++) {
+        const currentDate = new Date(today);
+        currentDate.setDate(today.getDate() + dayOffset);
+        const dateStr = formatDate(currentDate);
+
+        // Generate hourly slots from 9:00 AM to 9:00 PM
+        for (let hour = 9; hour <= 21; hour++) {
+          const startTime24 = `${String(hour).padStart(2, '0')}:00:00`;
+          const endHour = hour + 1;
+          const endTime24 = `${String(endHour).padStart(2, '0')}:00:00`;
+
+          // Create the lookup key (must match backend format exactly)
+          const lookupKey = `${dateStr}_${startTime24}`;
+
+          // Check if this slot is booked
+          const isBooked = approvedBookingsMap.has(lookupKey);
+
+          // Check if this slot is in the past
+          const isExpired = isPastSlot(dateStr, startTime24);
+
+          // Create event start and end times for FullCalendar
+          const eventStart = `${dateStr}T${startTime24}`;
+          const eventEnd = `${dateStr}T${endTime24}`;
+
+          if (isBooked) {
+            // BOOKED SLOT (RED)
+            allEvents.push({
+              id: `booked-${dateStr}-${hour}`,
+              title: 'Booked',
+              start: eventStart,
+              end: eventEnd,
+              backgroundColor: '#ef4444', // red-500
+              borderColor: '#ef4444',
+              textColor: '#ffffff',
+              classNames: ['booked-slot'],
+              extendedProps: {
+                type: 'booked',
+                date: dateStr,
+                time: startTime24,
+                hour: hour
+              }
+            });
+          } else if (isExpired) {
+            // EXPIRED SLOT (GREY)
+            allEvents.push({
+              id: `expired-${dateStr}-${hour}`,
+              title: 'Expired',
+              start: eventStart,
+              end: eventEnd,
+              backgroundColor: '#e5e7eb', // gray-200
+              borderColor: '#d1d5db', // gray-300
+              textColor: '#9ca3af', // gray-400
+              classNames: ['expired-slot'],
+              extendedProps: {
+                type: 'expired',
+                date: dateStr,
+                time: startTime24,
+                hour: hour
+              }
+            });
+          } else {
+            // AVAILABLE SLOT (GREEN)
+            const displayTime = formatTo12Hour(startTime24);
+            
+            allEvents.push({
+              id: `available-${dateStr}-${hour}`,
+              title: displayTime,
+              start: eventStart,
+              end: eventEnd,
+              backgroundColor: '#22c55e', // green-500
+              borderColor: '#22c55e',
+              textColor: '#ffffff',
+              classNames: ['available-slot'],
+              extendedProps: {
+                type: 'available',
+                date: dateStr,
+                time: startTime24,
+                hour: hour
+              }
+            });
           }
-        };
-      });
+        }
+      }
 
-      setStats({
-        total: validSlots.length,
-        available: availableCount,
-        reserved: reservedCount,
-        booked: bookedCount
-      });
+      console.log('📅 Generated', allEvents.length, 'calendar events');
+      console.log('🔴 Booked slots:', allEvents.filter(e => e.extendedProps.type === 'booked').length);
+      console.log('🟢 Available slots:', allEvents.filter(e => e.extendedProps.type === 'available').length);
+      console.log('⏰ Expired slots:', allEvents.filter(e => e.extendedProps.type === 'expired').length);
 
-      setEvents(calendarEvents);
+      setEvents(allEvents);
     } catch (err) {
-      console.error('Error fetching slots:', err);
+      console.error('❌ Error fetching bookings:', err);
       setError('Failed to load calendar. Please try again later.');
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleEventClick = (info) => {
-    const { isActive, isBooked, status, startTime, endTime, isPast } = info.event.extendedProps;
-    const slotDate = new Date(info.event.start).toLocaleDateString();
-    
-    // Prevent clicking on expired or inactive slots
-    if (isPast || !isActive) {
-      return;
-    }
+  /**
+   * Handle event click
+   */
+  function handleEventClick(info) {
+    const { type, date, time, hour } = info.event.extendedProps;
 
-    // If slot is available and user is not logged in, redirect to login
-    if (status === 'available' && !isBooked && !isLoggedIn) {
-      toast('Please login to book this slot', {
+    if (type === 'booked') {
+      // Booked slot - show toast and prevent action
+      toast.error('Slot is already booked', {
         duration: 2000,
-        icon: '🔐',
-        style: {
-          background: '#3b82f6',
-          color: '#fff',
-        },
-      });
-      setTimeout(() => {
-        navigate('/login');
-      }, 800);
-      return;
-    }
-    
-    // Show slot details for logged-in users
-    if (status === 'available' && isActive && !isBooked) {
-      toast(`Available Slot\n\nDate: ${slotDate}\nTime: ${startTime} - ${endTime}\n\nPlease proceed to book this slot.`, {
-        duration: 3000,
-        icon: '✅',
-        style: {
-          background: '#22c55e',
-          color: '#fff',
-        },
-      });
-    } else if (status === 'booked' || isBooked) {
-      toast(`This slot is already booked.\n\nDate: ${slotDate}\nTime: ${startTime} - ${endTime}`, {
-        duration: 3000,
-        icon: '❌',
+        icon: <FiClock />,
         style: {
           background: '#ef4444',
           color: '#fff',
         },
       });
-    } else if (status === 'pending') {
-      toast(`This slot is reserved (pending approval).\n\nDate: ${slotDate}\nTime: ${startTime} - ${endTime}`, {
-        duration: 3000,
-        icon: '⏳',
+      return;
+    }
+
+    if (type === 'expired') {
+      // Expired slot - show toast and prevent action
+      toast.error('This time slot has expired', {
+        duration: 2000,
+        icon: <FiClock />,
         style: {
-          background: '#eab308',
+          background: '#9ca3af',
+          color: '#fff',
+        },
+      });
+      return;
+    }
+
+    if (type === 'available') {
+      // Available slot - open booking modal with pre-filled date and time
+      if (onOpenBookingModal) {
+        const startTime = time.substring(0, 5); // Convert HH:MM:SS to HH:MM
+        onOpenBookingModal(date, startTime);
+      }
+      
+      toast.success('Please fill in your booking details', {
+        duration: 2000,
+        icon: <FiCalendar />,
+        style: {
+          background: '#22c55e',
           color: '#fff',
         },
       });
     }
-  };
-
-  const dayCellClassNames = (arg) => {
-    const cellDate = new Date(arg.date);
-    cellDate.setHours(0, 0, 0, 0);
-    const todayDate = new Date();
-    todayDate.setHours(0, 0, 0, 0);
-    
-    // Highlight current day
-    if (cellDate.getTime() === todayDate.getTime()) {
-      return ['current-day-highlight'];
-    }
-    
-    // Disable past dates
-    if (cellDate < todayDate) {
-      return ['past-date-disabled'];
-    }
-    
-    return [];
-  };
+  }
 
   if (loading) {
     return (
@@ -226,7 +252,7 @@ function WeeklyCalendar() {
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mb-4"></div>
-            <p className="text-gray-600 font-medium">Loading calendar...</p>
+            <p className="text-gray-600 dark:text-gray-400 font-medium">Loading calendar...</p>
           </div>
         </div>
       </div>
@@ -239,9 +265,9 @@ function WeeklyCalendar() {
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="text-red-500 text-5xl mb-4">⚠️</div>
-            <p className="text-gray-700 font-medium mb-2">{error}</p>
+            <p className="text-gray-700 dark:text-gray-300 font-medium mb-2">{error}</p>
             <button 
-              onClick={fetchSlots}
+              onClick={fetchBookingsAndGenerateSlots}
               className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Retry
@@ -253,93 +279,138 @@ function WeeklyCalendar() {
   }
 
   return (
-    <div className="weekly-calendar-container">
-      {/* Stats Summary - Inline */}
-      <div className="mb-4 flex flex-wrap items-center justify-center gap-4 text-sm">
-        <div className="flex items-center gap-2">
-          <span className="text-gray-600 dark:text-gray-400">Total:</span>
-          <span className="font-bold text-gray-900 dark:text-gray-100">{stats.total}</span>
+    <div className="weekly-calendar-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+      {/* Header with Legend and Book Button */}
+      <div className="flex items-center justify-between mb-2 py-2 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+        {/* Legend */}
+        <div className="flex items-center gap-4 text-xs">
+          <span className="font-semibold text-gray-700 dark:text-gray-300">Legend:</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm bg-green-500"></span>
+            <span className="text-gray-600 dark:text-gray-400">Available</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm bg-red-500"></span>
+            <span className="text-gray-600 dark:text-gray-400">Booked</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm bg-gray-300"></span>
+            <span className="text-gray-600 dark:text-gray-400">Expired</span>
+          </div>
         </div>
-        <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-green-500"></span>
-          <span className="text-gray-600 dark:text-gray-400">Available:</span>
-          <span className="font-bold text-green-600 dark:text-green-400">{stats.available}</span>
-        </div>
-        <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
-          <span className="text-gray-600 dark:text-gray-400">Reserved:</span>
-          <span className="font-bold text-yellow-600 dark:text-yellow-400">{stats.reserved}</span>
-        </div>
-        <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-red-500"></span>
-          <span className="text-gray-600 dark:text-gray-400">Booked:</span>
-          <span className="font-bold text-red-600 dark:text-red-400">{stats.booked}</span>
-        </div>
+
+        {/* Book Button */}
+        {isLoggedIn && user?.role === 'user' && (
+          <button
+            onClick={() => {
+              if (onOpenBookingModal) {
+                onOpenBookingModal(null, null); // No date or time pre-selected
+              }
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-xs font-medium rounded-lg hover:from-indigo-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            <FiPlus className="w-3.5 h-3.5" />
+            Book Slot
+          </button>
+        )}
       </div>
 
-      {/* Badge showing availability period */}
-      <div className="mb-4 flex items-center justify-center">
-        <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold shadow-sm">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          Showing availability for next 15 days
-        </div>
+      {/* Calendar - Week View with Navigation */}
+      <div className="calendar-card-premium bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-[20px] shadow-2xl shadow-gray-200/50 dark:shadow-gray-900/50 border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+        <FullCalendar
+          plugins={[timeGridPlugin, interactionPlugin]}
+          initialView="timeGridWeek"
+          initialDate={todayStr}
+          headerToolbar={{
+            left: 'title',
+            center: '',
+            right: 'today,prev,next'
+          }}
+          validRange={{
+            start: todayStr,
+            end: endDateStr
+          }}
+          visibleRange={{
+            start: todayStr,
+            end: endDateStr
+          }}
+          slotMinTime="09:00:00"
+          slotMaxTime="22:00:00"
+          allDaySlot={false}
+          height="auto"
+          contentHeight="auto"
+          events={events}
+          eventClick={handleEventClick}
+          eventOverlap={false}
+          slotEventOverlap={false}
+          dayHeaderFormat={{ weekday: 'short', month: 'numeric', day: 'numeric' }}
+          nowIndicator={true}
+          slotDuration="01:00:00"
+          slotLabelInterval="01:00"
+          expandRows={true}
+          stickyHeaderDates={true}
+          firstDay={new Date(todayStr).getDay()}
+          slotLabelFormat={{
+            hour: 'numeric',
+            minute: '2-digit',
+            omitZeroMinute: false,
+            meridiem: 'short',
+            hour12: true
+          }}
+          eventDidMount={(info) => {
+            const { type } = info.event.extendedProps;
+            
+            // Add tooltip
+            let tooltipText = '';
+            if (type === 'booked') {
+              tooltipText = 'This slot is already booked';
+            } else if (type === 'expired') {
+              tooltipText = 'This time slot has expired';
+            } else if (type === 'available') {
+              tooltipText = 'Click to book this slot';
+            }
+            info.el.setAttribute('title', tooltipText);
+            
+            // Set cursor style
+            if (type === 'available') {
+              info.el.style.cursor = 'pointer';
+            } else {
+              info.el.style.cursor = 'not-allowed';
+            }
+            
+            // Force styling for booked slots (RED)
+            if (type === 'booked') {
+              info.el.style.setProperty('background-color', '#ef4444', 'important');
+              info.el.style.setProperty('border-color', '#ef4444', 'important');
+              info.el.style.setProperty('color', '#ffffff', 'important');
+            }
+            
+            // Force styling for available slots (GREEN)
+            if (type === 'available') {
+              info.el.style.setProperty('background-color', '#22c55e', 'important');
+              info.el.style.setProperty('border-color', '#22c55e', 'important');
+              info.el.style.setProperty('color', '#ffffff', 'important');
+            }
+            
+            // Force styling for expired slots (GREY)
+            if (type === 'expired') {
+              info.el.style.setProperty('background-color', '#e5e7eb', 'important');
+              info.el.style.setProperty('border-color', '#d1d5db', 'important');
+              info.el.style.setProperty('color', '#9ca3af', 'important');
+              info.el.style.opacity = '0.6';
+            }
+          }}
+          eventContent={(eventInfo) => {
+            return (
+              <div className="fc-event-content-wrapper">
+                <div className="fc-event-title font-semibold text-center">
+                  {eventInfo.event.title}
+                </div>
+              </div>
+            );
+          }}
+        />
       </div>
-
-      <FullCalendar
-        plugins={[timeGridPlugin, interactionPlugin]}
-        initialView="timeGridWeek"
-        initialDate={todayDateString}
-        timeZone="local"
-        headerToolbar={{
-          left: 'title',
-          center: '',
-          right: 'today,prev,next'
-        }}
-        validRange={{
-          start: todayDateString,
-          end: endDateString
-        }}
-        slotMinTime="09:00:00"
-        slotMaxTime="21:00:00"
-        allDaySlot={false}
-        height="auto"
-        contentHeight="auto"
-        events={events}
-        eventClick={handleEventClick}
-        nowIndicator={true}
-        slotDuration="00:30:00"
-        slotLabelInterval="01:00"
-        expandRows={true}
-        stickyHeaderDates={true}
-        dayCellClassNames={dayCellClassNames}
-        dayHeaderFormat={{ weekday: 'short', month: 'numeric', day: 'numeric' }}
-        slotLabelFormat={{
-          hour: 'numeric',
-          minute: '2-digit',
-          meridiem: 'short'
-        }}
-        eventTimeFormat={{
-          hour: 'numeric',
-          minute: '2-digit',
-          meridiem: 'short'
-        }}
-        eventContent={(eventInfo) => {
-          const { isPast, isActive, tooltip } = eventInfo.event.extendedProps;
-          return (
-            <div 
-              className={`fc-event-content-wrapper ${isPast || !isActive ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-              title={tooltip}
-            >
-              <div className="fc-event-title">{eventInfo.event.title}</div>
-            </div>
-          );
-        }}
-      />
     </div>
   );
 }
