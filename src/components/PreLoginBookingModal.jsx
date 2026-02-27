@@ -14,16 +14,10 @@ function PreLoginBookingModal({ isOpen, onClose, selectedDate, selectedTime }) {
   const [errors, setErrors] = useState({});
 
   const durationOptions = [
-    { value: 5, label: '5 minutes' },
-    { value: 10, label: '10 minutes' },
-    { value: 15, label: '15 minutes' },
     { value: 30, label: '30 minutes' },
-    { value: 45, label: '45 minutes' },
     { value: 60, label: '60 minutes (1 hour)' },
     { value: 90, label: '90 minutes (1.5 hours)' },
-    { value: 120, label: '120 minutes (2 hours)' },
-    { value: 150, label: '150 minutes (2.5 hours)' },
-    { value: 180, label: '180 minutes (3 hours)' }
+    { value: 120, label: '120 minutes (2 hours)' }
   ];
 
   useEffect(() => {

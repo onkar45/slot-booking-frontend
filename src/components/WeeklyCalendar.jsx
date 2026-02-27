@@ -14,6 +14,9 @@ function WeeklyCalendar({ onOpenBookingModal }) {
   const { user } = useContext(AuthContext);
   const isLoggedIn = !!localStorage.getItem('token');
 
+  // Performance optimization cache for overlap detection
+  const [overlapCache] = useState(() => new Map());
+
   // Date range: TODAY + next 15 days
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -69,33 +72,148 @@ function WeeklyCalendar({ onOpenBookingModal }) {
   }
 
   /**
+   * Calculate end time from start time and duration in minutes
+   * @param {Object} booking - Booking object with booking_date, start_time, and duration_minutes
+   * @returns {string} - End time in HH:MM:SS format
+   */
+  function calculateEndTime(booking) {
+    try {
+      const startDateTime = new Date(`${booking.booking_date}T${booking.start_time}`);
+      const durationMs = (booking.duration_minutes || 30) * 60 * 1000; // Default to 30 minutes
+      const endDateTime = new Date(startDateTime.getTime() + durationMs);
+      return endDateTime.toTimeString().slice(0, 8); // HH:MM:SS format
+    } catch (error) {
+      console.warn('⚠️ Error calculating end time for booking:', booking, error);
+      // Fallback: assume 30 minutes duration
+      const startDateTime = new Date(`${booking.booking_date}T${booking.start_time}`);
+      const endDateTime = new Date(startDateTime.getTime() + (30 * 60 * 1000));
+      return endDateTime.toTimeString().slice(0, 8);
+    }
+  }
+
+  /**
+   * Parse booking into time range object for overlap detection
+   * @param {Object} booking - Booking object from API
+   * @returns {Object} - Time range object with start, end, id, and date
+   */
+  function parseBookingTimeRange(booking) {
+    try {
+      const startDateTime = new Date(`${booking.booking_date}T${booking.start_time}`);
+      const endTime = booking.end_time || calculateEndTime(booking);
+      const endDateTime = new Date(`${booking.booking_date}T${endTime}`);
+      
+      return {
+        id: booking.id,
+        start: startDateTime,
+        end: endDateTime,
+        date: booking.booking_date,
+        originalBooking: booking
+      };
+    } catch (error) {
+      console.warn('⚠️ Error parsing booking time range:', booking, error);
+      // Return null for invalid bookings - they will be filtered out
+      return null;
+    }
+  }
+
+  /**
+   * Check if a time slot overlaps with any booking ranges
+   * @param {Date} slotStart - Start time of the slot
+   * @param {Date} slotEnd - End time of the slot  
+   * @param {Array} bookingRanges - Array of booking time range objects
+   * @returns {boolean} - True if slot overlaps with any booking
+   */
+  function checkSlotOverlap(slotStart, slotEnd, bookingRanges) {
+    return bookingRanges.some(booking => {
+      // Two time ranges overlap if: booking.start < slotEnd AND booking.end > slotStart
+      return booking.start < slotEnd && booking.end > slotStart;
+    });
+  }
+
+  /**
+   * Cached version of slot overlap check for performance optimization
+   * @param {Date} slotStart - Start time of the slot
+   * @param {Date} slotEnd - End time of the slot
+   * @param {Array} bookingRanges - Array of booking time range objects
+   * @returns {boolean} - True if slot overlaps with any booking
+   */
+  function checkSlotOverlapCached(slotStart, slotEnd, bookingRanges) {
+    const cacheKey = `${slotStart.getTime()}-${slotEnd.getTime()}-${bookingRanges.length}`;
+    
+    if (overlapCache.has(cacheKey)) {
+      return overlapCache.get(cacheKey);
+    }
+    
+    const isBooked = checkSlotOverlap(slotStart, slotEnd, bookingRanges);
+    
+    // Implement simple LRU by clearing cache if it gets too large
+    if (overlapCache.size > 1000) {
+      overlapCache.clear();
+    }
+    
+    overlapCache.set(cacheKey, isBooked);
+    return isBooked;
+  }
+
+  /**
    * Main function to fetch bookings and generate calendar slots
    */
   async function fetchBookingsAndGenerateSlots() {
+    const startTime = performance.now(); // Performance timing
+    
     try {
       setLoading(true);
       setError(null);
+
+      // Clear cache when fetching new bookings
+      overlapCache.clear();
+
+      console.log('🚀 WeeklyCalendar: Starting to fetch bookings...');
 
       // Step 1: Fetch approved bookings from backend
       const response = await API.get('/bookings/approved-public');
       const approvedBookings = response.data || [];
       
       console.log('📥 Fetched approved bookings:', approvedBookings.length);
+      console.log('🔍 RAW BOOKING DATA:', JSON.stringify(approvedBookings, null, 2));
 
-      // Step 2: Build a Map for quick lookup
-      // Key format: "YYYY-MM-DD_HH:MM:SS"
-      const approvedBookingsMap = new Map();
+      // Step 2: Parse bookings into time range objects for overlap detection
+      const bookingRanges = approvedBookings
+        .map(parseBookingTimeRange)
+        .filter(range => range !== null); // Remove invalid bookings
       
-      approvedBookings.forEach(booking => {
-        const key = `${booking.booking_date}_${booking.start_time}`;
-        approvedBookingsMap.set(key, true);
-      });
+      console.log('🗺️ Parsed booking ranges:', bookingRanges.length);
+      console.log('📊 Booking coverage details:', bookingRanges.map(b => ({
+        id: b.id,
+        date: b.date,
+        start: b.start.toTimeString().slice(0, 8),
+        end: b.end.toTimeString().slice(0, 8),
+        duration: Math.round((b.end - b.start) / (60 * 1000)) + ' minutes',
+        originalBooking: {
+          start_time: b.originalBooking.start_time,
+          end_time: b.originalBooking.end_time,
+          duration_minutes: b.originalBooking.duration_minutes
+        }
+      })));
 
-      console.log('🗺️ Bookings map created with', approvedBookingsMap.size, 'entries');
+      // Debug: Check for 120-minute bookings specifically
+      const longBookings = bookingRanges.filter(b => {
+        const durationMinutes = Math.round((b.end - b.start) / (60 * 1000));
+        return durationMinutes >= 120;
+      });
+      
+      if (longBookings.length > 0) {
+        console.log('🔍 Found long bookings (120+ minutes):', longBookings.map(b => ({
+          id: b.id,
+          date: b.date,
+          start: b.start.toTimeString().slice(0, 8),
+          end: b.end.toTimeString().slice(0, 8),
+          duration: Math.round((b.end - b.start) / (60 * 1000)) + ' minutes'
+        })));
+      }
 
       // Step 3: Generate calendar slots for TODAY + next 15 days
       const allEvents = [];
-      const now = new Date();
 
       // Loop through each day from today to today + 15 days
       for (let dayOffset = 0; dayOffset <= 15; dayOffset++) {
@@ -103,17 +221,36 @@ function WeeklyCalendar({ onOpenBookingModal }) {
         currentDate.setDate(today.getDate() + dayOffset);
         const dateStr = formatDate(currentDate);
 
+        // Filter bookings for current date to optimize overlap checks
+        const dayBookingRanges = bookingRanges.filter(booking => booking.date === dateStr);
+
         // Generate hourly slots from 9:00 AM to 9:00 PM
         for (let hour = 9; hour <= 21; hour++) {
           const startTime24 = `${String(hour).padStart(2, '0')}:00:00`;
           const endHour = hour + 1;
           const endTime24 = `${String(endHour).padStart(2, '0')}:00:00`;
 
-          // Create the lookup key (must match backend format exactly)
-          const lookupKey = `${dateStr}_${startTime24}`;
+          // Create slot time range for overlap detection
+          const slotStart = new Date(`${dateStr}T${startTime24}`);
+          const slotEnd = new Date(`${dateStr}T${endTime24}`);
 
-          // Check if this slot is booked
-          const isBooked = approvedBookingsMap.has(lookupKey);
+          // Check if this slot overlaps with any booking (using cached version)
+          const isBooked = checkSlotOverlapCached(slotStart, slotEnd, dayBookingRanges);
+
+          // Debug logging for multi-hour bookings
+          if (dayBookingRanges.length > 0 && hour >= 15 && hour <= 17) { // Focus on 3-5 PM range
+            console.log(`🔍 Slot ${hour}:00-${hour+1}:00 on ${dateStr}:`, {
+              isBooked,
+              slotStart: slotStart.toTimeString().slice(0, 8),
+              slotEnd: slotEnd.toTimeString().slice(0, 8),
+              dayBookings: dayBookingRanges.map(b => ({
+                id: b.id,
+                start: b.start.toTimeString().slice(0, 8),
+                end: b.end.toTimeString().slice(0, 8),
+                overlaps: b.start < slotEnd && b.end > slotStart
+              }))
+            });
+          }
 
           // Check if this slot is in the past
           const isExpired = isPastSlot(dateStr, startTime24);
@@ -182,10 +319,15 @@ function WeeklyCalendar({ onOpenBookingModal }) {
         }
       }
 
+      const endTime = performance.now();
+      const processingTime = Math.round(endTime - startTime);
+
       console.log('📅 Generated', allEvents.length, 'calendar events');
       console.log('🔴 Booked slots:', allEvents.filter(e => e.extendedProps.type === 'booked').length);
       console.log('🟢 Available slots:', allEvents.filter(e => e.extendedProps.type === 'available').length);
       console.log('⏰ Expired slots:', allEvents.filter(e => e.extendedProps.type === 'expired').length);
+      console.log('⚡ Processing time:', processingTime + 'ms');
+      console.log('💾 Cache size:', overlapCache.size, 'entries');
 
       setEvents(allEvents);
     } catch (err) {

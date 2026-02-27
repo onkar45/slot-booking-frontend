@@ -41,10 +41,52 @@ function CustomCalendar({ onOpenBookingModal }) {
     return `${hour12}:${minutes} ${ampm}`;
   }
 
-  function isPastSlot(dateStr, timeStr) {
-    const slotDateTime = new Date(`${dateStr}T${timeStr}`);
-    const now = new Date();
-    return slotDateTime < now;
+  /**
+   * Calculate end time from start time and duration in minutes
+   */
+  function calculateEndTime(booking) {
+    try {
+      const startDateTime = new Date(`${booking.booking_date}T${booking.start_time}`);
+      const durationMs = (booking.duration_minutes || 30) * 60 * 1000;
+      const endDateTime = new Date(startDateTime.getTime() + durationMs);
+      return endDateTime.toTimeString().slice(0, 8);
+    } catch (error) {
+      console.warn('⚠️ Error calculating end time for booking:', booking, error);
+      const startDateTime = new Date(`${booking.booking_date}T${booking.start_time}`);
+      const endDateTime = new Date(startDateTime.getTime() + (30 * 60 * 1000));
+      return endDateTime.toTimeString().slice(0, 8);
+    }
+  }
+
+  /**
+   * Parse booking into time range object for overlap detection
+   */
+  function parseBookingTimeRange(booking) {
+    try {
+      const startDateTime = new Date(`${booking.booking_date}T${booking.start_time}`);
+      const endTime = booking.end_time || calculateEndTime(booking);
+      const endDateTime = new Date(`${booking.booking_date}T${endTime}`);
+      
+      return {
+        id: booking.id,
+        start: startDateTime,
+        end: endDateTime,
+        date: booking.booking_date,
+        originalBooking: booking
+      };
+    } catch (error) {
+      console.warn('⚠️ Error parsing booking time range:', booking, error);
+      return null;
+    }
+  }
+
+  /**
+   * Check if a time slot overlaps with any booking ranges
+   */
+  function checkSlotOverlap(slotStart, slotEnd, bookingRanges) {
+    return bookingRanges.some(booking => {
+      return booking.start < slotEnd && booking.end > slotStart;
+    });
   }
 
   async function fetchBookingsAndGenerateSlots() {
@@ -53,11 +95,22 @@ function CustomCalendar({ onOpenBookingModal }) {
       const response = await API.get('/bookings/approved-public');
       const approvedBookings = response.data || [];
       
-      const approvedBookingsMap = new Map();
-      approvedBookings.forEach(booking => {
-        const key = `${booking.booking_date}_${booking.start_time}`;
-        approvedBookingsMap.set(key, true);
-      });
+      console.log('📥 CustomCalendar - Fetched approved bookings:', approvedBookings.length);
+      console.log('🔍 RAW BOOKING DATA:', approvedBookings);
+
+      // Parse bookings into time range objects for overlap detection
+      const bookingRanges = approvedBookings
+        .map(parseBookingTimeRange)
+        .filter(range => range !== null);
+      
+      console.log('🗺️ Parsed booking ranges:', bookingRanges.length);
+      console.log('📊 Booking coverage details:', bookingRanges.map(b => ({
+        id: b.id,
+        date: b.date,
+        start: b.start.toTimeString().slice(0, 8),
+        end: b.end.toTimeString().slice(0, 8),
+        duration: Math.round((b.end - b.start) / (60 * 1000)) + ' minutes'
+      })));
 
       const allSlots = [];
       
@@ -66,11 +119,36 @@ function CustomCalendar({ onOpenBookingModal }) {
         currentDate.setDate(today.getDate() + dayOffset);
         const dateStr = formatDate(currentDate);
 
+        // Filter bookings for current date to optimize overlap checks
+        const dayBookingRanges = bookingRanges.filter(booking => booking.date === dateStr);
+
         for (let hour = 9; hour <= 21; hour++) {
           const startTime24 = `${String(hour).padStart(2, '0')}:00:00`;
-          const lookupKey = `${dateStr}_${startTime24}`;
-          const isBooked = approvedBookingsMap.has(lookupKey);
+          const endHour = hour + 1;
+          const endTime24 = `${String(endHour).padStart(2, '0')}:00:00`;
+
+          // Create slot time range for overlap detection
+          const slotStart = new Date(`${dateStr}T${startTime24}`);
+          const slotEnd = new Date(`${dateStr}T${endTime24}`);
+
+          // Check if this slot overlaps with any booking
+          const isBooked = checkSlotOverlap(slotStart, slotEnd, dayBookingRanges);
           const isExpired = isPastSlot(dateStr, startTime24);
+
+          // Debug logging for multi-hour bookings
+          if (dayBookingRanges.length > 0 && hour >= 18 && hour <= 20) { // Focus on 6-8 PM range
+            console.log(`🔍 CustomCalendar - Slot ${hour}:00-${hour+1}:00 on ${dateStr}:`, {
+              isBooked,
+              slotStart: slotStart.toTimeString().slice(0, 8),
+              slotEnd: slotEnd.toTimeString().slice(0, 8),
+              dayBookings: dayBookingRanges.map(b => ({
+                id: b.id,
+                start: b.start.toTimeString().slice(0, 8),
+                end: b.end.toTimeString().slice(0, 8),
+                overlaps: b.start < slotEnd && b.end > slotStart
+              }))
+            });
+          }
 
           let status = 'available';
           if (isBooked) status = 'booked';
@@ -86,6 +164,11 @@ function CustomCalendar({ onOpenBookingModal }) {
         }
       }
 
+      console.log('📅 CustomCalendar - Generated', allSlots.length, 'calendar slots');
+      console.log('🔴 Booked slots:', allSlots.filter(s => s.status === 'booked').length);
+      console.log('🟢 Available slots:', allSlots.filter(s => s.status === 'available').length);
+      console.log('⏰ Expired slots:', allSlots.filter(s => s.status === 'expired').length);
+
       setEvents(allSlots);
     } catch (err) {
       console.error('Error fetching bookings:', err);
@@ -93,6 +176,12 @@ function CustomCalendar({ onOpenBookingModal }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  function isPastSlot(dateStr, timeStr) {
+    const slotDateTime = new Date(`${dateStr}T${timeStr}`);
+    const now = new Date();
+    return slotDateTime < now;
   }
 
   function handleSlotClick(slot) {

@@ -29,13 +29,52 @@ function UserDashboard() {
       console.log('📝 UserDashboard - Processing pending booking:', bookingData);
 
       // Convert the data to match the API format
+      // PreLoginBookingModal saves: { date, startTime, duration, description }
+      // API expects: { date, start_time, duration_minutes }
+      
+      // Ensure time is in HH:MM:SS format
+      let formattedTime = bookingData.startTime;
+      if (formattedTime && !formattedTime.includes(':00:')) {
+        // If time is in HH:MM format, add seconds
+        if (formattedTime.match(/^\d{2}:\d{2}$/)) {
+          formattedTime = formattedTime + ':00';
+        }
+        // If time is in H:MM format, pad hour and add seconds
+        else if (formattedTime.match(/^\d{1}:\d{2}$/)) {
+          formattedTime = '0' + formattedTime + ':00';
+        }
+      }
+      
+      // Validate and correct duration to match backend requirements
+      const allowedDurations = [30, 60, 90, 120];
+      let validDuration = parseInt(bookingData.duration);
+      
+      if (!allowedDurations.includes(validDuration)) {
+        console.warn('⚠️ Invalid duration detected:', validDuration, 'Correcting to nearest valid duration');
+        // Find the closest valid duration
+        if (validDuration < 30) validDuration = 30;
+        else if (validDuration <= 45) validDuration = 30;
+        else if (validDuration <= 75) validDuration = 60;
+        else if (validDuration <= 105) validDuration = 90;
+        else validDuration = 120; // Cap at maximum allowed
+        
+        console.log('✅ Corrected duration from', bookingData.duration, 'to', validDuration, 'minutes');
+      }
+      
       const apiBookingData = {
         date: bookingData.date,
-        start_time: bookingData.startTime + (bookingData.startTime.includes(':00') ? '' : ':00'), // Add seconds if not present
-        duration_minutes: bookingData.duration
+        start_time: formattedTime,
+        duration_minutes: validDuration
       };
 
       console.log('📝 UserDashboard - Sending pending booking to API:', apiBookingData);
+      console.log('📝 UserDashboard - Data validation:');
+      console.log('📝 - Date format:', apiBookingData.date, 'Valid:', /^\d{4}-\d{2}-\d{2}$/.test(apiBookingData.date));
+      console.log('📝 - Time format:', apiBookingData.start_time, 'Valid:', /^\d{2}:\d{2}:\d{2}$/.test(apiBookingData.start_time));
+      console.log('📝 - Duration:', apiBookingData.duration_minutes, 'Type:', typeof apiBookingData.duration_minutes);
+      console.log('📝 - Token present:', !!localStorage.getItem('token'));
+      console.log('📝 - API URL:', import.meta.env.VITE_API_URL + '/bookings');
+      
       const response = await API.post('/bookings', apiBookingData);
       
       console.log('✅ UserDashboard - Pending booking created successfully:', response.data);
@@ -57,10 +96,38 @@ function UserDashboard() {
     } catch (err) {
       console.error('❌ UserDashboard - Failed to process pending booking:', err);
       console.error('❌ Error details:', err.response?.data);
+      console.error('❌ Error status:', err.response?.status);
+      console.error('❌ Error headers:', err.response?.headers);
       
-      // Keep the pending booking in localStorage for manual retry
-      toast.error('Failed to create your pre-login booking. You can try booking again using the "Book Custom Time" button.', {
-        duration: 6000,
+      let errorMessage = 'Failed to create your pre-login booking.';
+      
+      // Log detailed validation errors if available
+      if (err.response?.data?.detail && Array.isArray(err.response.data.detail)) {
+        console.error('❌ Validation errors:');
+        const validationErrors = [];
+        
+        err.response.data.detail.forEach((error, index) => {
+          const errorInfo = {
+            field: error.loc?.join(' → ') || 'Unknown',
+            message: error.msg || 'Unknown error',
+            type: error.type || 'Unknown',
+            input: error.input
+          };
+          console.error(`❌ Error ${index + 1}:`, errorInfo);
+          validationErrors.push(`${errorInfo.field}: ${errorInfo.message}`);
+        });
+        
+        errorMessage = 'Validation errors:\n' + validationErrors.join('\n');
+      } else if (err.response?.data?.detail && typeof err.response.data.detail === 'string') {
+        errorMessage = err.response.data.detail;
+      } else if (err.response?.status === 422) {
+        errorMessage = 'Invalid booking data. Please check your date, time, and duration.';
+      } else if (err.response?.status === 401) {
+        errorMessage = 'Authentication failed. Please try logging in again.';
+      }
+      
+      toast.error(errorMessage, {
+        duration: 8000,
       });
     }
   };
@@ -145,6 +212,15 @@ function UserDashboard() {
       console.log('🔄 Refreshing dashboard after booking success...');
       fetchData();
     }, 1500); // Increased delay to 1.5 seconds
+  };
+
+  const clearPendingBooking = () => {
+    localStorage.removeItem('pendingBooking');
+    setHasPendingBooking(false);
+    toast.success('Pending booking cleared', {
+      duration: 2000,
+      icon: '🗑️',
+    });
   };
 
   // Calculate stats
@@ -249,6 +325,15 @@ function UserDashboard() {
                   title="Retry processing pending booking"
                 >
                   Retry Pending
+                </button>
+              )}
+              {hasPendingBooking && (
+                <button
+                  onClick={clearPendingBooking}
+                  className="px-3 py-2 bg-gray-500 text-white text-sm rounded-lg hover:bg-gray-600 transition-colors"
+                  title="Clear pending booking"
+                >
+                  Clear Pending
                 </button>
               )}
             </div>
