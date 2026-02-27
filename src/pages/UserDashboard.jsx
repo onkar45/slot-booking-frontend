@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast';
 import Navbar from "../components/Navbar";
 import BookingModal from "../components/BookingModal";
-import { FiCalendar, FiClock, FiCheckCircle, FiPlus, FiUsers, FiActivity } from 'react-icons/fi';
+import { FiCalendar, FiPlus, FiUsers, FiActivity, FiCheckCircle } from 'react-icons/fi';
 
 function UserDashboard() {
   const [bookings, setBookings] = useState([]);
@@ -276,24 +276,31 @@ function UserDashboard() {
     .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-indigo-400/10 to-purple-600/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+      </div>
+
       <Toaster position="top-right" />
       <Navbar />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Book a Time</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Book a Time</h1>
               <div className="flex items-center gap-4">
-                <p className="text-gray-600">Create and manage your bookings</p>
+                <p className="text-gray-600 dark:text-gray-300">Create and manage your bookings</p>
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${
                     connectionStatus === 'connected' ? 'bg-green-500' :
                     connectionStatus === 'error' ? 'bg-red-500' : 'bg-yellow-500'
                   }`}></div>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     {connectionStatus === 'connected' ? 'Connected' :
                      connectionStatus === 'error' ? 'Connection Error' : 'Connecting...'}
                   </span>
@@ -306,14 +313,21 @@ function UserDashboard() {
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowBookingModal(true)}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-medium text-sm shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 flex items-center gap-2"
+              >
+                <FiPlus className="w-4 h-4" />
+                Book Custom Time
+              </button>
               <button
                 onClick={() => {
                   console.log('🔄 Manual refresh triggered');
                   fetchData();
                   toast.success('Dashboard refreshed!', { duration: 2000 });
                 }}
-                className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 title="Refresh dashboard"
               >
                 <FiActivity className="w-5 h-5" />
@@ -342,71 +356,38 @@ function UserDashboard() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 dark:border-gray-700/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Your Active Bookings</p>
-                <p className="text-3xl font-bold text-green-600">{activeBookingsCount}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Your Active Bookings</p>
+                <p className="text-3xl font-bold text-green-600 dark:text-green-400">{activeBookingsCount}</p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <FiActivity className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                <FiActivity className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 dark:border-gray-700/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Total Bookings</p>
-                <p className="text-3xl font-bold text-blue-600">{totalBookings}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Total Bookings</p>
+                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{totalBookings}</p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <FiUsers className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Book Your Time Slot Section */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-8">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <FiCalendar className="w-6 h-6 text-white" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Book Your Time Slot</h3>
-              <p className="text-gray-600 mb-4">
-                Click the button below to open the booking form. Choose your preferred date, time, and duration. 
-                Your booking will be pending until approved by an admin.
-              </p>
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <FiClock className="w-4 h-4" />
-                  <span>Business Hours: 9:00 AM - 9:00 PM</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <FiCalendar className="w-4 h-4" />
-                  <span>Book up to 15 days in advance</span>
-                </div>
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <FiUsers className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <button
-              onClick={() => setShowBookingModal(true)}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
-            >
-              <FiPlus className="w-4 h-4" />
-              Book Custom Time
-            </button>
           </div>
         </div>
 
         {/* My Recent Bookings */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/20 hover:shadow-3xl transition-all duration-500">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-600 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 dark:from-blue-900/20 dark:to-indigo-900/20 backdrop-blur-sm rounded-t-3xl">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">My Recent Bookings</h3>
-                <p className="text-sm text-gray-600">Your latest {Math.min(recentBookings.length, 3)} booking(s) out of {bookings.length} total</p>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">My Recent Bookings</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Your latest {Math.min(recentBookings.length, 3)} booking(s) out of {bookings.length} total</p>
               </div>
               <button
                 onClick={() => navigate('/my-bookings')}
@@ -425,13 +406,13 @@ function UserDashboard() {
           ) : connectionStatus === 'error' ? (
             <div className="p-8 text-center">
               <div className="text-red-500 text-4xl mb-4">⚠️</div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Backend Connection Error</h3>
-              <p className="text-gray-600 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Backend Connection Error</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 Cannot connect to the backend server. Please ensure:
               </p>
-              <ul className="text-sm text-gray-600 text-left max-w-md mx-auto mb-6 space-y-1">
-                <li>• Backend server is running on <code className="bg-gray-100 px-1 rounded">http://127.0.0.1:8000</code></li>
-                <li>• CORS is configured to allow <code className="bg-gray-100 px-1 rounded">http://localhost:5173</code></li>
+              <ul className="text-sm text-gray-600 dark:text-gray-300 text-left max-w-md mx-auto mb-6 space-y-1">
+                <li>• Backend server is running on <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">http://127.0.0.1:8000</code></li>
+                <li>• CORS is configured to allow <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">http://localhost:5173</code></li>
                 <li>• All required endpoints are implemented</li>
               </ul>
               <button
@@ -444,7 +425,7 @@ function UserDashboard() {
           ) : recentBookings.length === 0 ? (
             <div className="p-8 text-center">
               <FiCalendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-4">No bookings yet</p>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">No bookings yet</p>
               <button
                 onClick={() => setShowBookingModal(true)}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
@@ -453,22 +434,22 @@ function UserDashboard() {
               </button>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-gray-200 dark:divide-gray-600">
               {recentBookings.map((booking) => (
-                <div key={booking.id} className="p-6 hover:bg-gray-50 transition-colors border-l-4 border-blue-500">
+                <div key={booking.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                         <FiCalendar className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="font-bold text-gray-900 text-lg">
+                        <p className="font-bold text-gray-900 dark:text-white text-lg">
                           {formatDate(booking.date || booking.booking_date)}
                         </p>
-                        <p className="text-base text-gray-700 font-semibold">
+                        <p className="text-base text-gray-700 dark:text-gray-300 font-semibold">
                           {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
                         </p>
-                        <p className="text-sm text-blue-600 font-medium mt-1">
+                        <p className="text-sm text-blue-600 dark:text-blue-400 font-medium mt-1">
                           {getBookingDescription(booking)}
                         </p>
                       </div>

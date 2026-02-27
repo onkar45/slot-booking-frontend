@@ -318,19 +318,26 @@ function AdminUsers() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-indigo-400/10 to-purple-600/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+      </div>
+
       <Toaster position="top-right" />
       <AdminNavbar />
 
       {/* Create User Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 backdrop-blur-sm bg-gray-900/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Create New User</h3>
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full p-8 transform transition-all border border-white/20 dark:border-gray-700/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100">Create New User</h3>
               <button
                 onClick={handleCreateModalClose}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <FiXCircle className="w-6 h-6" />
               </button>
@@ -348,10 +355,10 @@ function AdminUsers() {
                   value={formData.name}
                   onChange={handleInputChange}
                   onBlur={() => handleInputBlur('name')}
-                  className={`w-full border rounded-lg px-4 py-2.5 focus:ring-2 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700 ${
+                  className={`w-full border rounded-2xl px-4 py-3 focus:ring-2 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700/50 backdrop-blur-sm font-medium ${
                     formErrors.name && formTouched.name
                       ? 'border-red-500 focus:ring-red-500 dark:border-red-500'
-                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                      : 'border-white/20 dark:border-gray-600/20 focus:ring-blue-500'
                   }`}
                   placeholder="Enter name"
                 />
@@ -374,10 +381,10 @@ function AdminUsers() {
                   value={formData.email}
                   onChange={handleInputChange}
                   onBlur={() => handleInputBlur('email')}
-                  className={`w-full border rounded-lg px-4 py-2.5 focus:ring-2 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700 ${
+                  className={`w-full border rounded-2xl px-4 py-3 focus:ring-2 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700/50 backdrop-blur-sm font-medium ${
                     formErrors.email && formTouched.email
                       ? 'border-red-500 focus:ring-red-500 dark:border-red-500'
-                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                      : 'border-white/20 dark:border-gray-600/20 focus:ring-blue-500'
                   }`}
                   placeholder="Enter email"
                 />
@@ -400,10 +407,10 @@ function AdminUsers() {
                   value={formData.password}
                   onChange={handleInputChange}
                   onBlur={() => handleInputBlur('password')}
-                  className={`w-full border rounded-lg px-4 py-2.5 focus:ring-2 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700 ${
+                  className={`w-full border rounded-2xl px-4 py-3 focus:ring-2 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700/50 backdrop-blur-sm font-medium ${
                     formErrors.password && formTouched.password
                       ? 'border-red-500 focus:ring-red-500 dark:border-red-500'
-                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
+                      : 'border-white/20 dark:border-gray-600/20 focus:ring-blue-500'
                   }`}
                   placeholder="Enter password"
                 />
@@ -424,25 +431,25 @@ function AdminUsers() {
                   name="role"
                   value={formData.role}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700"
+                  className="w-full border border-white/20 dark:border-gray-600/20 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700/50 backdrop-blur-sm font-medium"
                 >
                   <option value="user">User</option>
                   <option value="admin" disabled>Admin (disabled)</option>
                 </select>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-4 pt-6">
                 <button
                   type="button"
                   onClick={handleCreateModalClose}
-                  className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                  className="flex-1 px-6 py-4 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-2xl font-bold hover:bg-white/80 dark:hover:bg-gray-600/80 transition-all duration-300 border border-white/20 dark:border-gray-600/20 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || !formData.name || !formData.email || !formData.password}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transform hover:-translate-y-0.5"
                 >
                   {submitting ? (
                     <>
@@ -465,12 +472,12 @@ function AdminUsers() {
       {/* Edit User Modal */}
       {showEditModal && (
         <div className="fixed inset-0 backdrop-blur-sm bg-gray-900/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Edit User</h3>
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full p-8 transform transition-all border border-white/20 dark:border-gray-700/20 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100">Edit User</h3>
               <button
                 onClick={() => setShowEditModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <FiXCircle className="w-6 h-6" />
               </button>
@@ -488,7 +495,7 @@ function AdminUsers() {
                   value={editFormData.name}
                   onChange={handleEditChange}
                   required
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700"
+                  className="w-full border border-white/20 dark:border-gray-600/20 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700/50 backdrop-blur-sm font-medium"
                   placeholder="Enter name"
                 />
               </div>
@@ -504,7 +511,7 @@ function AdminUsers() {
                   value={editFormData.email}
                   onChange={handleEditChange}
                   required
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700"
+                  className="w-full border border-white/20 dark:border-gray-600/20 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700/50 backdrop-blur-sm font-medium"
                   placeholder="Enter email"
                 />
               </div>
@@ -528,18 +535,18 @@ function AdminUsers() {
                 </label>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-4 pt-6">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                  className="flex-1 px-6 py-4 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-2xl font-bold hover:bg-white/80 dark:hover:bg-gray-600/80 transition-all duration-300 border border-white/20 dark:border-gray-600/20 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={editSubmitting}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transform hover:-translate-y-0.5"
                 >
                   {editSubmitting ? (
                     <>
@@ -562,42 +569,42 @@ function AdminUsers() {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 backdrop-blur-sm bg-gray-900/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
-              <FiTrash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full p-8 transform transition-all border border-white/20 dark:border-gray-700/20">
+            <div className="flex items-center justify-center w-16 h-16 mx-auto bg-red-100/80 dark:bg-red-900/30 backdrop-blur-sm rounded-full mb-6 shadow-lg">
+              <FiTrash2 className="w-8 h-8 text-red-600 dark:text-red-400" />
             </div>
             
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 text-center mb-2">
+            <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 text-center mb-3">
               Delete User?
             </h3>
             
-            <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
+            <p className="text-gray-600 dark:text-gray-400 text-center mb-8 text-lg">
               Are you sure you want to delete this user? This action cannot be undone.
             </p>
 
             {selectedUser && (
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-600">
-                <div className="flex items-center mb-2">
-                  <FiUser className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" />
-                  <span className="font-medium text-gray-700 dark:text-gray-300">{selectedUser.name}</span>
+              <div className="bg-gradient-to-r from-red-50/80 to-red-100/80 dark:from-red-900/30 dark:to-red-800/30 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-red-200/50 dark:border-red-700/50 shadow-lg">
+                <div className="flex items-center mb-3">
+                  <FiUser className="w-6 h-6 text-red-600 dark:text-red-400 mr-3" />
+                  <span className="font-bold text-gray-900 dark:text-gray-100 text-lg">{selectedUser.name}</span>
                 </div>
                 <div className="flex items-center">
-                  <FiMail className="w-5 h-5 text-gray-600 dark:text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">{selectedUser.email}</span>
+                  <FiMail className="w-6 h-6 text-red-600 dark:text-red-400 mr-3" />
+                  <span className="text-gray-700 dark:text-gray-300 font-medium">{selectedUser.email}</span>
                 </div>
               </div>
             )}
 
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                className="flex-1 px-6 py-4 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-2xl font-bold hover:bg-white/80 dark:hover:bg-gray-600/80 transition-all duration-300 border border-white/20 dark:border-gray-600/20 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteConfirm}
-                className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors duration-200 shadow-lg hover:shadow-xl"
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-2xl font-bold hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transform hover:-translate-y-0.5"
               >
                 Delete
               </button>
@@ -606,33 +613,33 @@ function AdminUsers() {
         </div>
       )}
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">User Management</h2>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Create and manage user accounts</p>
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2">User Management</h2>
+            <p className="text-gray-600 dark:text-gray-300 font-medium text-lg">Create and manage user accounts</p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
+            className="inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-2xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 text-base transform hover:-translate-y-0.5"
           >
-            <FiPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+            <FiPlus className="w-5 h-5 mr-2" />
             Create User
           </button>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 mb-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl p-6 mb-8 border border-white/20 dark:border-gray-700/20 hover:shadow-3xl transition-all duration-500">
+          <div className="flex flex-col sm:flex-row gap-6">
             {/* Status Filter Dropdown */}
             <div className="w-full sm:w-48">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                 Status
               </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full px-4 py-3 rounded-2xl border border-white/20 dark:border-gray-700/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -642,17 +649,17 @@ function AdminUsers() {
 
             {/* Search Bar */}
             <div className="flex-1 relative">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                 Search
               </label>
               <div className="relative">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Search by name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full pl-12 pr-4 py-4 rounded-2xl border border-white/20 dark:border-gray-700/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300"
                 />
               </div>
             </div>
@@ -660,22 +667,22 @@ function AdminUsers() {
         </div>
 
         {/* User List Table */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-200">All Users</h3>
+        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/20 hover:shadow-3xl transition-all duration-500">
+          <div className="p-6 border-b border-white/20 dark:border-gray-700/20 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 dark:from-blue-900/20 dark:to-indigo-900/20 backdrop-blur-sm rounded-t-3xl">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">All Users</h3>
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center py-12">
+            <div className="flex items-center justify-center py-20">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-500 dark:text-gray-400">Loading users...</p>
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-6"></div>
+                <p className="text-gray-500 dark:text-gray-400 font-medium text-lg">Loading users...</p>
               </div>
             </div>
           ) : filteredUsers.length === 0 ? (
             <div className="p-12 text-center">
-              <FiUser className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">
+              <FiUser className="w-20 h-20 text-gray-400 dark:text-gray-500 mx-auto mb-6" />
+              <p className="text-gray-900 dark:text-white text-2xl font-black mb-3">
                 {searchQuery || statusFilter !== 'all' 
                   ? 'No users match your filters.' 
                   : 'No users found.'}
@@ -686,7 +693,7 @@ function AdminUsers() {
                     setSearchQuery('');
                     setStatusFilter('all');
                   }}
-                  className="mt-2 text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                  className="mt-4 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transform hover:-translate-y-0.5"
                 >
                   Clear filters
                 </button>
@@ -695,106 +702,106 @@ function AdminUsers() {
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
+                <table className="min-w-full divide-y divide-white/20 dark:divide-gray-700/20">
+                <thead className="bg-gradient-to-r from-gray-50/80 to-gray-100/80 dark:from-gray-800/80 dark:to-gray-700/80 backdrop-blur-sm">
                   <tr>
-                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       ID
                     </th>
-                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Role
                     </th>
-                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Created At
                     </th>
-                    <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm divide-y divide-white/20 dark:divide-gray-700/20">
                   {currentUsers.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                    <tr key={user.id} className="hover:bg-white/70 dark:hover:bg-gray-700/70 transition-all duration-300 transform hover:-translate-y-0.5">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100">
                         {user.id}
                       </td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
                           {user.name}
                         </span>
                       </td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                         {user.email}
                       </td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-4 py-2 rounded-2xl text-xs font-black shadow-lg ${
                           user.role === 'admin'
-                            ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300'
-                            : 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
+                            ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-purple-500/30'
+                            : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-blue-500/30'
                         }`}>
-                          {user.role}
+                          {user.role.toUpperCase()}
                         </span>
                       </td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-4 py-2 rounded-2xl text-xs font-black shadow-lg ${
                           user.is_active
-                            ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
-                            : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-green-500/30'
+                            : 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-red-500/30'
                         }`}>
-                          {user.is_active ? 'Active' : 'Inactive'}
+                          {user.is_active ? 'ACTIVE' : 'INACTIVE'}
                         </span>
                       </td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                         {new Date(user.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         {canModifyUser(user) ? (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-3">
                             <button
                               onClick={() => handleEditClick(user)}
-                              className="group relative inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-110 active:scale-95"
+                              className="group relative inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transform hover:-translate-y-0.5 hover:scale-110"
                               title="Edit user"
                             >
-                              <FiEdit2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                              <FiEdit2 className="w-4 h-4" />
                             </button>
 
                             {user.is_active ? (
                               <button
                                 onClick={() => handleDeactivate(user.id)}
-                                className="group relative inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-full hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-110 active:scale-95"
+                                className="group relative inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-2xl hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 transition-all duration-300 shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 transform hover:-translate-y-0.5 hover:scale-110"
                                 title="Deactivate user"
                               >
-                                <FiXCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <FiXCircle className="w-4 h-4" />
                               </button>
                             ) : (
                               <button
                                 onClick={() => handleActivate(user.id)}
-                                className="group relative inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-full hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-110 active:scale-95"
+                                className="group relative inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transform hover:-translate-y-0.5 hover:scale-110"
                                 title="Activate user"
                               >
-                                <FiCheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <FiCheckCircle className="w-4 h-4" />
                               </button>
                             )}
 
                             <button
                               onClick={() => handleDeleteClick(user)}
-                              className="group relative inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-full hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-110 active:scale-95"
+                              className="group relative inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-2xl hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 transition-all duration-300 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transform hover:-translate-y-0.5 hover:scale-110"
                               title="Delete user"
                             >
-                              <FiTrash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                              <FiTrash2 className="w-4 h-4" />
                             </button>
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-400 dark:text-gray-500 italic">
+                          <span className="text-xs text-gray-400 dark:text-gray-500 italic font-medium">
                             {user.role === 'admin' ? 'Admin user' : 'Current user'}
                           </span>
                         )}
@@ -807,8 +814,8 @@ function AdminUsers() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 pb-6">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 pb-6">
+                <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
                   Showing {startIndex + 1} to {Math.min(endIndex, filteredUsers.length)} of {filteredUsers.length} users
                   {(searchQuery || statusFilter !== 'all') && (
                     <span className="ml-1">(filtered from {users.length} total)</span>
@@ -819,7 +826,7 @@ function AdminUsers() {
                   <button
                     onClick={goToPrevious}
                     disabled={currentPage === 1}
-                    className="px-3 sm:px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    className="px-4 py-3 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 dark:border-gray-600/20 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                   >
                     Previous
                   </button>
@@ -837,10 +844,10 @@ function AdminUsers() {
                           <button
                             key={page}
                             onClick={() => goToPage(page)}
-                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg font-medium transition-colors duration-200 ${
+                            className={`w-10 h-10 rounded-2xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
                               currentPage === page
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-500/30'
+                                : 'bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 dark:border-gray-600/20 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80'
                             }`}
                           >
                             {page}
@@ -853,7 +860,7 @@ function AdminUsers() {
                         return (
                           <span
                             key={page}
-                            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-500 dark:text-gray-400"
+                            className="w-10 h-10 flex items-center justify-center text-gray-500 dark:text-gray-400 font-medium"
                           >
                             ...
                           </span>
@@ -866,7 +873,7 @@ function AdminUsers() {
                   <button
                     onClick={goToNext}
                     disabled={currentPage === totalPages}
-                    className="px-3 sm:px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    className="px-4 py-3 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 dark:border-gray-600/20 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                   >
                     Next
                   </button>

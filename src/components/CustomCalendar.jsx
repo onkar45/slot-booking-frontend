@@ -268,16 +268,12 @@ function CustomCalendar({ onOpenBookingModal }) {
             <span>Available</span>
           </div>
           <div className="legend-item">
-            <div className="legend-dot bg-gradient-warning"></div>
-            <span>Pending</span>
-          </div>
-          <div className="legend-item">
             <div className="legend-dot bg-gradient-danger"></div>
             <span>Booked</span>
           </div>
           <div className="legend-item">
             <div className="legend-dot bg-gray-400"></div>
-            <span>Inactive</span>
+            <span>Expired</span>
           </div>
         </div>
       </div>

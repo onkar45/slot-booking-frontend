@@ -122,10 +122,10 @@ function AdminDashboard() {
 
   const getStatusStyle = (status) => {
     if (status === "approved")
-      return "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300";
+      return "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-green-500/30";
     if (status === "rejected")
-      return "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300";
-    return "bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300";
+      return "bg-gradient-to-r from-red-500 to-red-600 text-white shadow-red-500/30";
+    return "bg-gradient-to-r from-yellow-500 to-orange-600 text-white shadow-yellow-500/30";
   };
 
   const formatTime = (timeString) => {
@@ -187,76 +187,85 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-indigo-400/10 to-purple-600/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+      </div>
+
       <Toaster position="top-right" />
       <AdminNavbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">All Bookings</h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">View and manage all booking requests</p>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <div className="mb-8">
+          <div>
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2">All Bookings</h2>
+            <p className="text-gray-600 dark:text-gray-300 font-medium text-lg">View and manage all booking requests</p>
+          </div>
         </div>
         
         {/* Statistics Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
-            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Bookings</p>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">{statistics.total}</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white/20 dark:border-gray-700/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-1">
+            <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">Total Bookings</p>
+            <p className="text-3xl font-black text-gray-900 dark:text-white">{statistics.total}</p>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
-            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Pending</p>
-            <p className="text-2xl sm:text-3xl font-bold text-yellow-600">{statistics.pending}</p>
+          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white/20 dark:border-gray-700/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-1">
+            <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">Pending</p>
+            <p className="text-3xl font-black text-yellow-600 dark:text-yellow-400">{statistics.pending}</p>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
-            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Approved</p>
-            <p className="text-2xl sm:text-3xl font-bold text-green-600">{statistics.approved}</p>
+          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white/20 dark:border-gray-700/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-1">
+            <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">Approved</p>
+            <p className="text-3xl font-black text-green-600 dark:text-green-400">{statistics.approved}</p>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
-            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Rejected</p>
-            <p className="text-2xl sm:text-3xl font-bold text-red-600 dark:text-red-400">{statistics.rejected}</p>
+          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white/20 dark:border-gray-700/20 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-1">
+            <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2">Rejected</p>
+            <p className="text-3xl font-black text-red-600 dark:text-red-400">{statistics.rejected}</p>
           </div>
         </div>
 
         {/* Filters and Controls */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 mb-6 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl p-6 mb-8 border border-white/20 dark:border-gray-700/20 hover:shadow-3xl transition-all duration-500">
           {/* Status Filter Buttons */}
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-3 mb-6">
             <button
               onClick={() => setStatusFilter('all')}
-              className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors duration-200 ${
+              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 ${
                 statusFilter === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-500/30'
+                  : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-600/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50'
               }`}
             >
               All
             </button>
             <button
               onClick={() => setStatusFilter('pending')}
-              className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors duration-200 ${
+              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 ${
                 statusFilter === 'pending'
-                  ? 'bg-yellow-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-gradient-to-r from-yellow-500 to-orange-600 text-white shadow-yellow-500/30'
+                  : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-600/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50'
               }`}
             >
               Pending
             </button>
             <button
               onClick={() => setStatusFilter('approved')}
-              className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors duration-200 ${
+              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 ${
                 statusFilter === 'approved'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-green-500/30'
+                  : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-600/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50'
               }`}
             >
               Approved
             </button>
             <button
               onClick={() => setStatusFilter('rejected')}
-              className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors duration-200 ${
+              className={`px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 shadow-lg transform hover:-translate-y-0.5 ${
                 statusFilter === 'rejected'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-red-500/30'
+                  : 'bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-600/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-600/50'
               }`}
             >
               Rejected
@@ -264,16 +273,16 @@ function AdminDashboard() {
           </div>
 
           {/* Search and Sort */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-4">
             {/* Search Bar */}
             <div className="flex-1 relative">
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search by username..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full pl-12 pr-4 py-4 rounded-2xl border border-white/20 dark:border-gray-700/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300"
               />
             </div>
 
@@ -281,7 +290,7 @@ function AdminDashboard() {
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="px-6 py-4 rounded-2xl border border-white/20 dark:border-gray-700/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <option value="latest">Latest First</option>
               <option value="oldest">Oldest First</option>
@@ -290,83 +299,83 @@ function AdminDashboard() {
         </div>
         
         {loading ? (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-500 dark:text-gray-400">Loading bookings...</p>
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-6"></div>
+              <p className="text-gray-500 dark:text-gray-400 font-medium text-lg">Loading bookings...</p>
             </div>
           </div>
         ) : filteredAndSortedBookings.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 sm:p-8 text-center border border-gray-200 dark:border-gray-700">
-            <FiCalendar className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg">
+          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl p-8 text-center border border-white/20 dark:border-gray-700/20 hover:shadow-3xl transition-all duration-500">
+            <FiCalendar className="w-20 h-20 text-gray-400 dark:text-gray-500 mx-auto mb-6" />
+            <p className="text-gray-500 dark:text-gray-400 text-xl font-medium">
               {searchQuery || statusFilter !== 'all' ? 'No bookings match your filters.' : 'No bookings found.'}
             </p>
           </div>
         ) : (
           <>
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-6">
               {currentBookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 p-4 sm:p-6 border border-gray-200 dark:border-gray-700"
+                  className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 p-6 sm:p-8 border border-white/20 dark:border-gray-700/20 transform hover:-translate-y-1"
                 >
-                  <div className="flex flex-col gap-4">
-                    <div className="space-y-2 flex-1">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="flex flex-col gap-6">
+                    <div className="space-y-4 flex-1">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <div>
-                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex items-center mb-1">
-                            <FiUser className="w-4 h-4 mr-1.5" />
+                          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center mb-2 font-medium">
+                            <FiUser className="w-5 h-5 mr-2" />
                             User
                           </p>
-                          <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
+                          <p className="font-bold text-gray-900 dark:text-white text-lg">
                             {booking.user?.name || booking.user?.email || 'N/A'}
                           </p>
                         </div>
                         
                         <div>
-                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex items-center mb-1">
-                            <FiCalendar className="w-4 h-4 mr-1.5" />
+                          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center mb-2 font-medium">
+                            <FiCalendar className="w-5 h-5 mr-2" />
                             Date
                           </p>
-                          <p className="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base">
+                          <p className="font-bold text-gray-900 dark:text-white text-lg">
                             {formatDate(booking.date || booking.booking_date)}
                           </p>
                         </div>
                         
                         <div>
-                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex items-center mb-1">
-                            <FiClock className="w-4 h-4 mr-1.5" />
+                          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center mb-2 font-medium">
+                            <FiClock className="w-5 h-5 mr-2" />
                             Time Slot
                           </p>
-                          <p className="font-medium text-gray-700 dark:text-gray-300 text-sm sm:text-base">
+                          <p className="font-bold text-gray-800 dark:text-gray-200 text-lg">
                             {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
                           </p>
                         </div>
                         
                         <div>
-                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex items-center mb-1">
-                            <FiClock className="w-4 h-4 mr-1.5" />
+                          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center mb-2 font-medium">
+                            <FiClock className="w-5 h-5 mr-2" />
                             Booked On
                           </p>
-                          <p className="font-medium text-gray-700 dark:text-gray-300 text-sm sm:text-base">
+                          <p className="font-bold text-gray-800 dark:text-gray-200 text-lg">
                             {new Date(booking.created_at).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
 
                       {/* Description */}
-                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Description:</p>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                      <div className="mt-4 pt-4 border-t border-gray-200/50 dark:border-gray-600/50">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 font-medium">Description:</p>
+                        <p className="text-base text-gray-700 dark:text-gray-300 font-medium">
                           {getBookingDescription(booking)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-2">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-2">
                       <span
-                        className={`inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold ${getStatusStyle(
+                        className={`inline-flex items-center px-6 py-3 rounded-2xl text-sm font-black shadow-lg ${getStatusStyle(
                           booking.status
                         )}`}
                       >
@@ -374,19 +383,19 @@ function AdminDashboard() {
                       </span>
 
                       {booking.status === 'pending' && (
-                        <div className="flex gap-2 w-full sm:w-auto">
+                        <div className="flex gap-3 w-full sm:w-auto">
                           <button
                             onClick={() => handleApprove(booking.id)}
-                            className="flex-1 sm:flex-none bg-gradient-to-r from-green-500 to-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium text-xs sm:text-sm flex items-center justify-center shadow-md hover:shadow-lg"
+                            className="flex-1 sm:flex-none bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-2xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 font-bold text-sm flex items-center justify-center shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transform hover:-translate-y-0.5"
                           >
-                            <FiCheckCircle className="mr-1.5 w-4 h-4" />
+                            <FiCheckCircle className="mr-2 w-5 h-5" />
                             Approve
                           </button>
                           <button
                             onClick={() => handleReject(booking.id)}
-                            className="flex-1 sm:flex-none bg-gradient-to-r from-red-500 to-red-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-medium text-xs sm:text-sm flex items-center justify-center shadow-md hover:shadow-lg"
+                            className="flex-1 sm:flex-none bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-2xl hover:from-red-600 hover:to-red-700 transition-all duration-300 font-bold text-sm flex items-center justify-center shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transform hover:-translate-y-0.5"
                           >
-                            <FiXCircle className="mr-1.5 w-4 h-4" />
+                            <FiXCircle className="mr-2 w-5 h-5" />
                             Reject
                           </button>
                         </div>
@@ -400,7 +409,7 @@ function AdminDashboard() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
                   Showing {startIndex + 1} to {Math.min(endIndex, filteredAndSortedBookings.length)} of {filteredAndSortedBookings.length} bookings
                 </div>
 
@@ -408,7 +417,7 @@ function AdminDashboard() {
                   <button
                     onClick={goToPrevious}
                     disabled={currentPage === 1}
-                    className="px-3 sm:px-4 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    className="px-4 py-3 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 dark:border-gray-600/20 text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                   >
                     Previous
                   </button>
