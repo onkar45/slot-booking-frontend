@@ -22,6 +22,10 @@ function MyBookings() {
     try {
       setLoading(true);
       const res = await API.get("/bookings/my-bookings");
+      console.log('📊 MyBookings - Booking data:', res.data);
+      if (res.data && res.data.length > 0) {
+        console.log('📊 Sample booking structure:', res.data[0]);
+      }
       setBookings(res.data);
     } catch (err) {
       console.log(err);
@@ -117,6 +121,32 @@ function MyBookings() {
     });
   };
 
+  const getBookingDescription = (booking) => {
+    const duration = booking.duration_minutes || calculateDuration(booking.start_time, booking.end_time);
+    const hours = Math.floor(duration / 60);
+    const minutes = duration % 60;
+    
+    let durationText = '';
+    if (hours > 0 && minutes > 0) {
+      durationText = `${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+      durationText = `${hours}h`;
+    } else {
+      durationText = `${minutes}m`;
+    }
+    
+    return `Time slot booking for ${durationText} duration`;
+  };
+
+  const calculateDuration = (startTime, endTime) => {
+    if (!startTime || !endTime) return 30; // Default fallback
+    
+    const start = new Date(`2000-01-01T${startTime}`);
+    const end = new Date(`2000-01-01T${endTime}`);
+    const diffMs = end - start;
+    return Math.round(diffMs / (1000 * 60)); // Convert to minutes
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
       <Toaster position="top-right" />
@@ -167,7 +197,7 @@ function MyBookings() {
               Start by booking your first slot!
             </p>
             <button
-              onClick={() => navigate('/user')}
+              onClick={() => navigate('/')}
               className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
               <FiCalendar className="mr-2" />
@@ -190,7 +220,7 @@ function MyBookings() {
                       </div>
                       <div>
                         <p className="font-bold text-gray-800 dark:text-gray-200 text-lg">
-                          {formatDate(booking.slot?.date) || 'N/A'}
+                          {formatDate(booking.date || booking.booking_date) || 'N/A'}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Date</p>
                       </div>
@@ -202,7 +232,7 @@ function MyBookings() {
                       </div>
                       <div>
                         <p className="font-semibold text-gray-700 dark:text-gray-300 text-base">
-                          {booking.slot?.start_time || 'N/A'} - {booking.slot?.end_time || 'N/A'}
+                          {booking.start_time || 'N/A'} - {booking.end_time || 'N/A'}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Time Slot</p>
                       </div>
@@ -217,6 +247,9 @@ function MyBookings() {
                           hour: '2-digit',
                           minute: '2-digit'
                         })}
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        {getBookingDescription(booking)}
                       </p>
                     </div>
                   </div>
@@ -276,12 +309,12 @@ function MyBookings() {
               <div className="bg-red-50 dark:bg-red-900/30 rounded-lg p-4 space-y-2">
                 <div className="flex items-center text-gray-800 dark:text-gray-200">
                   <FiCalendar className="w-5 h-5 mr-2 text-red-600 dark:text-red-400" />
-                  <span className="font-semibold">{formatDate(selectedBooking.slot?.date)}</span>
+                  <span className="font-semibold">{formatDate(selectedBooking.date || selectedBooking.booking_date)}</span>
                 </div>
                 <div className="flex items-center text-gray-800 dark:text-gray-200">
                   <FiClock className="w-5 h-5 mr-2 text-red-600 dark:text-red-400" />
                   <span className="font-semibold">
-                    {selectedBooking.slot?.start_time} - {selectedBooking.slot?.end_time}
+                    {selectedBooking.start_time} - {selectedBooking.end_time}
                   </span>
                 </div>
               </div>

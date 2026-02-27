@@ -54,6 +54,45 @@ function Login() {
     }
   };
 
+  const processPendingBooking = async () => {
+    const pendingBookingData = localStorage.getItem('pendingBooking');
+    if (!pendingBookingData) return;
+
+    try {
+      const bookingData = JSON.parse(pendingBookingData);
+      console.log('📝 Processing pending booking:', bookingData);
+
+      // Convert the data to match the API format
+      const apiBookingData = {
+        date: bookingData.date,
+        start_time: bookingData.startTime + ':00', // Add seconds if not present
+        duration_minutes: bookingData.duration
+      };
+
+      console.log('📝 Sending pending booking to API:', apiBookingData);
+      const response = await API.post('/bookings', apiBookingData);
+      
+      console.log('✅ Pending booking created successfully:', response.data);
+      
+      // Remove the pending booking from localStorage
+      localStorage.removeItem('pendingBooking');
+      
+      toast.success('Your pre-login booking has been created successfully!', {
+        duration: 5000,
+        icon: '✅',
+      });
+
+    } catch (err) {
+      console.error('❌ Failed to process pending booking:', err);
+      console.error('❌ Error details:', err.response?.data);
+      
+      // Keep the pending booking in localStorage for manual retry
+      toast.error('Failed to create your pre-login booking. Please try booking again from your dashboard.', {
+        duration: 6000,
+      });
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     
@@ -73,14 +112,18 @@ function Login() {
       await login(email, password);
       toast.success('Login successful!');
 
-      setTimeout(() => {
+      // Process any pending booking after successful login
+      setTimeout(async () => {
+        await processPendingBooking();
+        
         const userRole = localStorage.getItem('role');
         if (userRole === "admin") {
           navigate("/admin");
         } else {
           navigate("/user");
         }
-      }, 500);
+      }, 1000); // Give time for the success toast to show
+
     } catch (err) {
       console.error('Login error:', err);
       console.error('Error response:', err.response?.data);

@@ -8,7 +8,6 @@ import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MyBookings from "./pages/MyBookings";
-import ManageSlots from "./pages/ManageSlots";
 import AdminUsers from "./pages/AdminUsers";
 
 function App() {
@@ -46,15 +45,6 @@ function App() {
           element={
             <ProtectedRoute allowedRole="admin">
               <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/admin/manage-slots"
-          element={
-            <ProtectedRoute allowedRole="admin">
-              <ManageSlots />
             </ProtectedRoute>
           }
         />

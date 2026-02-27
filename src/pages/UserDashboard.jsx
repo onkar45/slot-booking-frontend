@@ -3,26 +3,80 @@ import API from "../services/api";
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast';
 import Navbar from "../components/Navbar";
-import { FiCalendar, FiClock, FiCheckCircle, FiAlertCircle, FiX, FiFilter } from 'react-icons/fi';
+import BookingModal from "../components/BookingModal";
+import { FiCalendar, FiClock, FiCheckCircle, FiPlus, FiUsers, FiActivity } from 'react-icons/fi';
 
 function UserDashboard() {
-  const [slots, setSlots] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [activeBookingsCount, setActiveBookingsCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [bookingSlotId, setBookingSlotId] = useState(null);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState(null);
-  const [filter, setFilter] = useState('all'); // 'all', 'available', 'booked'
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState('checking'); // 'checking', 'connected', 'error'
+  const [hasPendingBooking, setHasPendingBooking] = useState(false);
   const navigate = useNavigate();
+
+  const processPendingBooking = async () => {
+    const pendingBookingData = localStorage.getItem('pendingBooking');
+    if (!pendingBookingData) {
+      setHasPendingBooking(false);
+      return;
+    }
+
+    setHasPendingBooking(true);
+
+    try {
+      const bookingData = JSON.parse(pendingBookingData);
+      console.log('📝 UserDashboard - Processing pending booking:', bookingData);
+
+      // Convert the data to match the API format
+      const apiBookingData = {
+        date: bookingData.date,
+        start_time: bookingData.startTime + (bookingData.startTime.includes(':00') ? '' : ':00'), // Add seconds if not present
+        duration_minutes: bookingData.duration
+      };
+
+      console.log('📝 UserDashboard - Sending pending booking to API:', apiBookingData);
+      const response = await API.post('/bookings', apiBookingData);
+      
+      console.log('✅ UserDashboard - Pending booking created successfully:', response.data);
+      
+      // Remove the pending booking from localStorage
+      localStorage.removeItem('pendingBooking');
+      setHasPendingBooking(false);
+      
+      toast.success('Your pre-login booking has been created successfully!', {
+        duration: 5000,
+        icon: '✅',
+      });
+
+      // Refresh the dashboard data to show the new booking
+      setTimeout(() => {
+        fetchData();
+      }, 1000);
+
+    } catch (err) {
+      console.error('❌ UserDashboard - Failed to process pending booking:', err);
+      console.error('❌ Error details:', err.response?.data);
+      
+      // Keep the pending booking in localStorage for manual retry
+      toast.error('Failed to create your pre-login booking. You can try booking again using the "Book Custom Time" button.', {
+        duration: 6000,
+      });
+    }
+  };
 
   useEffect(() => {
     fetchData();
     
-    // Auto-refresh expired slots every 60 seconds
+    // Check for pending booking after component mounts
+    setTimeout(() => {
+      processPendingBooking();
+    }, 2000); // Wait 2 seconds to ensure user is fully logged in
+    
+    // Auto-refresh every 30 seconds to catch new bookings
     const intervalId = setInterval(() => {
-      recalculateExpiredSlots();
-    }, 60000);
+      fetchData();
+    }, 30000);
     
     return () => clearInterval(intervalId);
   }, []);
@@ -30,140 +84,71 @@ function UserDashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [slotsRes, bookingsRes, activeRes] = await Promise.all([
-        API.get("/slots/available"),
+      setConnectionStatus('checking');
+      console.log('🔄 Fetching user dashboard data...');
+      console.log('🔑 Current token:', localStorage.getItem('token') ? 'Present' : 'Missing');
+      console.log('🌐 API Base URL:', import.meta.env.VITE_API_URL);
+      
+      const [bookingsRes, activeRes] = await Promise.all([
         API.get("/bookings/my-bookings"),
         API.get("/bookings/active")
       ]);
       
-      // Filter out past slots and check if slot time has passed
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      console.log('📊 UserDashboard - Raw API responses:');
+      console.log('📊 Bookings response status:', bookingsRes.status);
+      console.log('📊 Active response status:', activeRes.status);
+      console.log('📊 Bookings data:', bookingsRes.data);
+      console.log('📊 Active data:', activeRes.data);
       
-      const futureSlots = slotsRes.data.filter(slot => {
-        const slotDate = new Date(slot.date);
-        return slotDate >= today;
-      }).map(slot => {
-        const slotDateTime = new Date(`${slot.date}T${slot.end_time}`);
-        const now = new Date();
-        const isPast = slotDateTime < now;
-        
-        return {
-          ...slot,
-          isPast: isPast
-        };
-      });
+      if (bookingsRes.data && Array.isArray(bookingsRes.data)) {
+        console.log('📊 Total bookings found:', bookingsRes.data.length);
+        if (bookingsRes.data.length > 0) {
+          console.log('📊 Sample booking structure:', bookingsRes.data[0]);
+          console.log('📊 All booking dates:', bookingsRes.data.map(b => b.date || b.booking_date));
+          console.log('📊 All booking statuses:', bookingsRes.data.map(b => b.status));
+        }
+      } else {
+        console.log('📊 Bookings data is not an array:', typeof bookingsRes.data);
+      }
       
-      setSlots(futureSlots);
       setBookings(bookingsRes.data || []);
       setActiveBookingsCount(activeRes.data?.active_count || 0);
+      setConnectionStatus('connected');
     } catch (err) {
-      console.log(err);
-      toast.error("Failed to load data");
+      console.error('❌ Error fetching dashboard data:', err);
+      console.error('❌ Error response:', err.response);
+      console.error('❌ Error details:', err.response?.data);
+      setConnectionStatus('error');
+      
+      // Check if it's a CORS or network error
+      if (err.message === 'Network Error' || err.code === 'ERR_NETWORK') {
+        toast.error("Cannot connect to server. Please check if the backend is running on http://127.0.0.1:8000", {
+          duration: 6000,
+        });
+      } else if (err.response?.status === 401) {
+        toast.error("Authentication failed. Please login again.");
+        // Redirect to login
+        navigate('/login');
+      } else {
+        toast.error("Failed to load data: " + (err.response?.data?.detail || err.message));
+      }
+      
       setActiveBookingsCount(0);
     } finally {
       setLoading(false);
     }
   };
 
-  const recalculateExpiredSlots = () => {
-    setSlots(prevSlots => 
-      prevSlots.map(slot => {
-        const slotDateTime = new Date(`${slot.date}T${slot.end_time}`);
-        const now = new Date();
-        const isPast = slotDateTime < now;
-        
-        return {
-          ...slot,
-          isPast: isPast
-        };
-      })
-    );
-  };
-
-  const handleBookClick = (slot) => {
-    setSelectedSlot(slot);
-    setShowConfirmModal(true);
-  };
-
-  const confirmBooking = async () => {
-    if (!selectedSlot) return;
-    
-    try {
-      setBookingSlotId(selectedSlot.id);
-      await API.post("/bookings", { slot_id: selectedSlot.id });
-      toast.success("Booking request sent successfully!", {
-        duration: 3000,
-        icon: '✅',
-      });
-      setShowConfirmModal(false);
-      setSelectedSlot(null);
+  const handleBookingSuccess = () => {
+    // Add a small delay to ensure backend has processed the booking
+    setTimeout(() => {
+      console.log('🔄 Refreshing dashboard after booking success...');
       fetchData();
-    } catch (err) {
-      console.error('Book slot error:', err.response?.data);
-      const errorMessage = err.response?.data?.detail 
-        || err.response?.data?.error 
-        || err.response?.data?.message
-        || "Error booking slot";
-      toast.error(errorMessage, {
-        duration: 4000,
-        style: {
-          maxWidth: '500px',
-        },
-      });
-    } finally {
-      setBookingSlotId(null);
-    }
+    }, 1500); // Increased delay to 1.5 seconds
   };
-
-  const cancelBooking = () => {
-    setShowConfirmModal(false);
-    setSelectedSlot(null);
-  };
-
-  // Get slot status
-  const getSlotStatus = (slot) => {
-    if (slot.isPast) return 'expired';
-    
-    const userBooking = bookings.find(b => b.slot_id === slot.id);
-    if (userBooking) {
-      return userBooking.status;
-    }
-    
-    if (slot.is_booked) return 'booked';
-    return 'available';
-  };
-
-  // Check if user has booked this slot
-  const isUserBooked = (slot) => {
-    return bookings.some(b => b.slot_id === slot.id);
-  };
-
-  // Filter slots
-  const filteredSlots = slots.filter(slot => {
-    const status = getSlotStatus(slot);
-    if (filter === 'available') {
-      return status === 'available';
-    } else if (filter === 'booked') {
-      return status === 'pending' || status === 'approved';
-    }
-    return true; // 'all'
-  });
-
-  // Group slots by date
-  const groupedSlots = filteredSlots.reduce((groups, slot) => {
-    const date = slot.date;
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(slot);
-    return groups;
-  }, {});
-
-  const sortedDates = Object.keys(groupedSlots).sort();
 
   // Calculate stats
-  const totalAvailable = slots.filter(s => !s.isPast && !s.is_booked).length;
+  const totalBookings = bookings.length;
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -175,268 +160,262 @@ function UserDashboard() {
     });
   };
 
-  const isToday = (dateString) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    return date.toDateString() === today.toDateString();
+  const formatTime = (timeString) => {
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
   };
 
-  const renderSlotButton = (slot) => {
-    const status = getSlotStatus(slot);
-    const isProcessing = bookingSlotId === slot.id;
-
-    switch (status) {
-      case 'expired':
-        return (
-          <button
-            disabled
-            className="w-full bg-gray-400 text-white py-2.5 rounded-lg font-medium cursor-not-allowed text-sm sm:text-base flex items-center justify-center opacity-60"
-          >
-            <FiAlertCircle className="mr-2" />
-            Expired
-          </button>
-        );
-      
-      case 'pending':
-        return (
-          <button
-            disabled
-            className="w-full bg-yellow-500 text-white py-2.5 rounded-lg font-medium cursor-not-allowed text-sm sm:text-base flex items-center justify-center"
-          >
-            <FiClock className="mr-2" />
-            Pending Approval
-          </button>
-        );
-      
-      case 'approved':
-        return (
-          <button
-            disabled
-            className="w-full bg-red-500 text-white py-2.5 rounded-lg font-medium cursor-not-allowed text-sm sm:text-base flex items-center justify-center"
-          >
-            <FiCheckCircle className="mr-2" />
-            Booked
-          </button>
-        );
-      
-      case 'booked':
-        return (
-          <button
-            disabled
-            className="w-full bg-red-500 text-white py-2.5 rounded-lg font-medium cursor-not-allowed text-sm sm:text-base flex items-center justify-center"
-          >
-            <FiCheckCircle className="mr-2" />
-            Booked
-          </button>
-        );
-      
-      default:
-        return (
-          <button
-            onClick={() => handleBookClick(slot)}
-            disabled={isProcessing}
-            className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 transition duration-200 text-sm sm:text-base flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isProcessing ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                Booking...
-              </>
-            ) : (
-              <>
-                <FiCheckCircle className="mr-2" />
-                Book Slot
-              </>
-            )}
-          </button>
-        );
+  const getBookingDescription = (booking) => {
+    const duration = booking.duration_minutes || calculateDuration(booking.start_time, booking.end_time);
+    const hours = Math.floor(duration / 60);
+    const minutes = duration % 60;
+    
+    let durationText = '';
+    if (hours > 0 && minutes > 0) {
+      durationText = `${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+      durationText = `${hours}h`;
+    } else {
+      durationText = `${minutes}m`;
     }
+    
+    return `Time slot booking for ${durationText} duration`;
   };
+
+  const calculateDuration = (startTime, endTime) => {
+    if (!startTime || !endTime) return 30; // Default fallback
+    
+    const start = new Date(`2000-01-01T${startTime}`);
+    const end = new Date(`2000-01-01T${endTime}`);
+    const diffMs = end - start;
+    return Math.round(diffMs / (1000 * 60)); // Convert to minutes
+  };
+
+  // Get recent bookings (last 3)
+  const recentBookings = bookings
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
+    <div className="min-h-screen bg-gray-50">
       <Toaster position="top-right" />
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">Available Slots</h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Browse and book available time slots</p>
-        </div>
-
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
-            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Available Slots</p>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">{totalAvailable}</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
-            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Your Active Bookings</p>
-            <p className="text-2xl sm:text-3xl font-bold text-green-600">{activeBookingsCount}</p>
-          </div>
-        </div>
-
-        {/* Filter Buttons */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 mb-6 border border-gray-200 dark:border-gray-700">
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors duration-200 ${
-                filter === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => setFilter('available')}
-              className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors duration-200 ${
-                filter === 'available'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              Available
-            </button>
-            <button
-              onClick={() => setFilter('booked')}
-              className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors duration-200 ${
-                filter === 'booked'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              Booked
-            </button>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-500 dark:text-gray-400">Loading slots...</p>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Book a Time</h1>
+              <div className="flex items-center gap-4">
+                <p className="text-gray-600">Create and manage your bookings</p>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${
+                    connectionStatus === 'connected' ? 'bg-green-500' :
+                    connectionStatus === 'error' ? 'bg-red-500' : 'bg-yellow-500'
+                  }`}></div>
+                  <span className="text-xs text-gray-500">
+                    {connectionStatus === 'connected' ? 'Connected' :
+                     connectionStatus === 'error' ? 'Connection Error' : 'Connecting...'}
+                  </span>
+                </div>
+                {hasPendingBooking && (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                    Processing pre-login booking...
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  console.log('🔄 Manual refresh triggered');
+                  fetchData();
+                  toast.success('Dashboard refreshed!', { duration: 2000 });
+                }}
+                className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                title="Refresh dashboard"
+              >
+                <FiActivity className="w-5 h-5" />
+              </button>
+              {hasPendingBooking && (
+                <button
+                  onClick={processPendingBooking}
+                  className="px-3 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors"
+                  title="Retry processing pending booking"
+                >
+                  Retry Pending
+                </button>
+              )}
             </div>
           </div>
-        ) : filteredSlots.length === 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 sm:p-8 text-center border border-gray-200 dark:border-gray-700">
-            <FiAlertCircle className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg">No slots available at the moment.</p>
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {sortedDates.map((date) => (
-              <div key={date}>
-                {/* Date Heading with TODAY badge */}
-                <h3 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-3">
-                  <FiCalendar className="text-blue-600 dark:text-blue-400 w-5 h-5" />
-                  {formatDate(date)}
-                  {isToday(date) && (
-                    <span className="px-2 sm:px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
-                      TODAY
-                    </span>
-                  )}
-                </h3>
+        </div>
 
-                {/* Slots Grid */}
-                <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {groupedSlots[date].map((slot) => {
-                    const status = getSlotStatus(slot);
-                    const isExpired = status === 'expired';
-                    const userBooked = isUserBooked(slot);
-                    
-                    return (
-                      <div
-                        key={slot.id}
-                        className={`bg-white dark:bg-gray-800 rounded-xl shadow-md transition-all duration-200 p-4 sm:p-5 border ${
-                          userBooked 
-                            ? 'border-red-300 dark:border-red-700' 
-                            : 'border-gray-200 dark:border-gray-700'
-                        } ${
-                          isExpired 
-                            ? 'opacity-50' 
-                            : 'hover:shadow-lg'
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Your Active Bookings</p>
+                <p className="text-3xl font-bold text-green-600">{activeBookingsCount}</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <FiActivity className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Total Bookings</p>
+                <p className="text-3xl font-bold text-blue-600">{totalBookings}</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <FiUsers className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Book Your Time Slot Section */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-8">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <FiCalendar className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Book Your Time Slot</h3>
+              <p className="text-gray-600 mb-4">
+                Click the button below to open the booking form. Choose your preferred date, time, and duration. 
+                Your booking will be pending until approved by an admin.
+              </p>
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-1">
+                  <FiClock className="w-4 h-4" />
+                  <span>Business Hours: 9:00 AM - 9:00 PM</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <FiCalendar className="w-4 h-4" />
+                  <span>Book up to 15 days in advance</span>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowBookingModal(true)}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <FiPlus className="w-4 h-4" />
+              Book Custom Time
+            </button>
+          </div>
+        </div>
+
+        {/* My Recent Bookings */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-1">My Recent Bookings</h3>
+                <p className="text-sm text-gray-600">Your latest {Math.min(recentBookings.length, 3)} booking(s) out of {bookings.length} total</p>
+              </div>
+              <button
+                onClick={() => navigate('/my-bookings')}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+              >
+                View All ({bookings.length})
+              </button>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="p-8 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-500">Loading bookings...</p>
+            </div>
+          ) : connectionStatus === 'error' ? (
+            <div className="p-8 text-center">
+              <div className="text-red-500 text-4xl mb-4">⚠️</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Backend Connection Error</h3>
+              <p className="text-gray-600 mb-4">
+                Cannot connect to the backend server. Please ensure:
+              </p>
+              <ul className="text-sm text-gray-600 text-left max-w-md mx-auto mb-6 space-y-1">
+                <li>• Backend server is running on <code className="bg-gray-100 px-1 rounded">http://127.0.0.1:8000</code></li>
+                <li>• CORS is configured to allow <code className="bg-gray-100 px-1 rounded">http://localhost:5173</code></li>
+                <li>• All required endpoints are implemented</li>
+              </ul>
+              <button
+                onClick={fetchData}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                Retry Connection
+              </button>
+            </div>
+          ) : recentBookings.length === 0 ? (
+            <div className="p-8 text-center">
+              <FiCalendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 mb-4">No bookings yet</p>
+              <button
+                onClick={() => setShowBookingModal(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                Book Your First Slot
+              </button>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {recentBookings.map((booking) => (
+                <div key={booking.id} className="p-6 hover:bg-gray-50 transition-colors border-l-4 border-blue-500">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <FiCalendar className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900 text-lg">
+                          {formatDate(booking.date || booking.booking_date)}
+                        </p>
+                        <p className="text-base text-gray-700 font-semibold">
+                          {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
+                        </p>
+                        <p className="text-sm text-blue-600 font-medium mt-1">
+                          {getBookingDescription(booking)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`px-4 py-2 rounded-full text-sm font-bold shadow-md ${
+                          booking.status === 'approved'
+                            ? 'bg-green-100 text-green-800 border-2 border-green-300'
+                            : booking.status === 'rejected'
+                            ? 'bg-red-100 text-red-800 border-2 border-red-300'
+                            : 'bg-yellow-100 text-yellow-800 border-2 border-yellow-300'
                         }`}
                       >
-                        <div className="space-y-3 mb-4">
-                          <div className="flex items-center">
-                            <FiClock className="w-5 h-5 text-gray-600 dark:text-gray-400 mr-2" />
-                            <p className="text-base font-semibold text-gray-800 dark:text-gray-200">
-                              {slot.start_time} - {slot.end_time}
-                            </p>
-                          </div>
-                        </div>
-
-                        {renderSlotButton(slot)}
-                      </div>
-                    );
-                  })}
+                        {booking.status === 'approved' && <FiCheckCircle className="w-4 h-4 inline mr-2" />}
+                        {booking.status.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Confirmation Modal */}
-      {showConfirmModal && selectedSlot && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-start mb-6">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                Confirm Booking
-              </h3>
-              <button
-                onClick={cancelBooking}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-              >
-                <FiX className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="mb-6 space-y-3">
-              <p className="text-gray-700 dark:text-gray-300 text-base">
-                Are you sure you want to book this slot?
-              </p>
-              
-              <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 space-y-2">
-                <div className="flex items-center text-gray-800 dark:text-gray-200">
-                  <FiCalendar className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
-                  <span className="font-semibold">{formatDate(selectedSlot.date)}</span>
-                </div>
-                <div className="flex items-center text-gray-800 dark:text-gray-200">
-                  <FiClock className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
-                  <span className="font-semibold">{selectedSlot.start_time} - {selectedSlot.end_time}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={cancelBooking}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmBooking}
-                disabled={bookingSlotId === selectedSlot.id}
-                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {bookingSlotId === selectedSlot.id ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
-                    Booking...
-                  </>
-                ) : (
-                  'Confirm'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+        onBookingSuccess={handleBookingSuccess}
+      />
     </div>
   );
 }

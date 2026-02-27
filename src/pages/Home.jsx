@@ -1,25 +1,69 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PublicNavbar from "../components/PublicNavbar";
 import CustomCalendar from "../components/CustomCalendar";
 import PreLoginBookingModal from "../components/PreLoginBookingModal";
+import BookingModal from "../components/BookingModal";
+import { AuthContext } from "../context/AuthContext";
 import toast, { Toaster } from 'react-hot-toast';
 import { FiCalendar, FiClock, FiCheckCircle, FiUsers, FiTrendingUp, FiShield } from 'react-icons/fi';
 
 function Home() {
   const [showPreLoginModal, setShowPreLoginModal] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem('token');
 
   const handleOpenBookingModal = (date, time) => {
+    console.log('🏠 Home page - Opening booking modal:', { date, time, isLoggedIn });
     setSelectedDate(date);
     setSelectedTime(time);
-    setShowPreLoginModal(true);
+    
+    if (isLoggedIn) {
+      console.log('🏠 User is logged in, opening BookingModal');
+      setShowBookingModal(true);
+    } else {
+      console.log('🏠 User not logged in, opening PreLoginBookingModal');
+      setShowPreLoginModal(true);
+    }
   };
 
   const handleCloseModal = () => {
     setShowPreLoginModal(false);
+    setShowBookingModal(false);
     setSelectedDate(null);
     setSelectedTime(null);
+  };
+
+  const handleBookingSuccess = () => {
+    console.log('🏠 Booking successful from home page');
+    toast.success(
+      (t) => (
+        <div className="flex flex-col gap-2">
+          <span className="font-semibold">Booking created successfully!</span>
+          <span className="text-sm text-gray-600">Your booking is pending approval.</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              navigate('/user-dashboard');
+            }}
+            className="mt-2 px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            View Dashboard
+          </button>
+        </div>
+      ),
+      {
+        duration: 6000,
+        icon: '✅',
+        style: {
+          maxWidth: '400px',
+        },
+      }
+    );
   };
 
   const features = [
@@ -208,6 +252,17 @@ function Home() {
         selectedDate={selectedDate}
         selectedTime={selectedTime}
       />
+
+      {/* Logged-in User Booking Modal */}
+      {isLoggedIn && (
+        <BookingModal
+          isOpen={showBookingModal}
+          onClose={handleCloseModal}
+          onBookingSuccess={handleBookingSuccess}
+          selectedDate={selectedDate}
+          selectedTime={selectedTime}
+        />
+      )}
 
     </div>
   );

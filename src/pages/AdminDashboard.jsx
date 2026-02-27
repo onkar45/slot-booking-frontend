@@ -20,6 +20,10 @@ function AdminDashboard() {
   const fetchBookings = async () => {
     try {
       const res = await API.get('/bookings');
+      console.log('📊 Admin Dashboard - Booking data:', res.data);
+      if (res.data && res.data.length > 0) {
+        console.log('📊 Sample booking structure:', res.data[0]);
+      }
       setBookings(res.data);
     } catch (err) {
       console.error('Error fetching bookings:', err);
@@ -122,6 +126,64 @@ function AdminDashboard() {
     if (status === "rejected")
       return "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300";
     return "bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300";
+  };
+
+  const formatTime = (timeString) => {
+    if (!timeString) return 'N/A';
+    try {
+      // Handle both HH:MM:SS and HH:MM formats
+      const timeParts = timeString.split(':');
+      const hours = parseInt(timeParts[0]);
+      const minutes = timeParts[1] || '00';
+      
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const hour12 = hours % 12 || 12;
+      
+      return `${hour12}:${minutes} ${ampm}`;
+    } catch (error) {
+      return timeString; // Return original if parsing fails
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        weekday: 'short', 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    } catch (error) {
+      return dateString; // Return original if parsing fails
+    }
+  };
+
+  const getBookingDescription = (booking) => {
+    const duration = booking.duration_minutes || calculateDuration(booking.start_time, booking.end_time);
+    const hours = Math.floor(duration / 60);
+    const minutes = duration % 60;
+    
+    let durationText = '';
+    if (hours > 0 && minutes > 0) {
+      durationText = `${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+      durationText = `${hours}h`;
+    } else {
+      durationText = `${minutes}m`;
+    }
+    
+    return `Time slot booking for ${durationText} duration`;
+  };
+
+  const calculateDuration = (startTime, endTime) => {
+    if (!startTime || !endTime) return 30; // Default fallback
+    
+    const start = new Date(`2000-01-01T${startTime}`);
+    const end = new Date(`2000-01-01T${endTime}`);
+    const diffMs = end - start;
+    return Math.round(diffMs / (1000 * 60)); // Convert to minutes
   };
 
   return (
@@ -268,7 +330,7 @@ function AdminDashboard() {
                             Date
                           </p>
                           <p className="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base">
-                            {booking.slot?.date || 'N/A'}
+                            {formatDate(booking.date || booking.booking_date)}
                           </p>
                         </div>
                         
@@ -278,7 +340,7 @@ function AdminDashboard() {
                             Time Slot
                           </p>
                           <p className="font-medium text-gray-700 dark:text-gray-300 text-sm sm:text-base">
-                            {booking.slot?.start_time || 'N/A'} - {booking.slot?.end_time || 'N/A'}
+                            {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
                           </p>
                         </div>
                         
@@ -291,6 +353,14 @@ function AdminDashboard() {
                             {new Date(booking.created_at).toLocaleDateString()}
                           </p>
                         </div>
+                      </div>
+
+                      {/* Description */}
+                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Description:</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                          {getBookingDescription(booking)}
+                        </p>
                       </div>
                     </div>
 

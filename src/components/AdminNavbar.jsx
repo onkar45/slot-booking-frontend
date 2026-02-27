@@ -39,18 +39,6 @@ function AdminNavbar() {
           </Link>
 
           <Link
-            to="/admin/manage-slots"
-            className={`text-sm sm:text-lg font-medium transition-colors ${
-              isActive('/admin/manage-slots')
-                ? 'text-blue-400 border-b-2 border-blue-400'
-                : 'text-gray-300 hover:text-blue-400'
-            }`}
-          >
-            <span className="hidden sm:inline">Manage Slots</span>
-            <span className="sm:hidden">Slots</span>
-          </Link>
-
-          <Link
             to="/admin/users"
             className={`text-sm sm:text-lg font-medium transition-colors ${
               isActive('/admin/users')
