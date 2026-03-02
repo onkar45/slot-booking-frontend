@@ -367,8 +367,11 @@ function AdminDashboard() {
                       {/* Description */}
                       <div className="mt-4 pt-4 border-t border-gray-200/50 dark:border-gray-600/50">
                         <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 font-medium">Description:</p>
-                        <p className="text-base text-gray-700 dark:text-gray-300 font-medium">
-                          {getBookingDescription(booking)}
+                        <p className="text-base text-gray-700 dark:text-gray-300 font-medium bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                          {booking.description || 'No description provided'}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 font-medium">
+                          Duration: {getBookingDescription(booking)}
                         </p>
                       </div>
                     </div>

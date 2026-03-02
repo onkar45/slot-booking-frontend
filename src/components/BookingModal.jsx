@@ -7,7 +7,8 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
   const [formData, setFormData] = useState({
     date: '',
     start_time: '',
-    duration: 30
+    duration: 30,
+    description: ''
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -136,7 +137,8 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
       const bookingData = {
         date: formData.date,
         start_time: formData.start_time + ':00',
-        duration_minutes: formData.duration
+        duration_minutes: formData.duration,
+        description: formData.description.trim() || null
       };
 
       console.log('📝 BookingModal - Submitting booking:', bookingData);
@@ -218,7 +220,8 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
     setFormData({
       date: '',
       start_time: '',
-      duration: 30
+      duration: 30,
+      description: ''
     });
     setErrors({});
     setIsSubmitting(false);
@@ -348,6 +351,25 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Description Textarea */}
+            <div>
+              <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <FiAlertTriangle className="mr-2 flex-shrink-0" />
+                Description (Optional)
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Describe the purpose of your booking..."
+                rows="4"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700 resize-none"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                Optional: Add any additional details about your booking
+              </p>
             </div>
 
             {/* Info Note */}

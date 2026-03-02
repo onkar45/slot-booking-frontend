@@ -27,10 +27,13 @@ function UserDashboard() {
     try {
       const bookingData = JSON.parse(pendingBookingData);
       console.log('📝 UserDashboard - Processing pending booking:', bookingData);
+      console.log('📝 UserDashboard - Description from localStorage:', bookingData.description);
+      console.log('📝 UserDashboard - Description type:', typeof bookingData.description);
+      console.log('📝 UserDashboard - Description length:', bookingData.description?.length);
 
       // Convert the data to match the API format
       // PreLoginBookingModal saves: { date, startTime, duration, description }
-      // API expects: { date, start_time, duration_minutes }
+      // API expects: { date, start_time, duration_minutes, description }
       
       // Ensure time is in HH:MM:SS format
       let formattedTime = bookingData.startTime;
@@ -64,14 +67,18 @@ function UserDashboard() {
       const apiBookingData = {
         date: bookingData.date,
         start_time: formattedTime,
-        duration_minutes: validDuration
+        duration_minutes: validDuration,
+        description: bookingData.description || null
       };
 
       console.log('📝 UserDashboard - Sending pending booking to API:', apiBookingData);
+      console.log('📝 UserDashboard - Full API payload:', JSON.stringify(apiBookingData, null, 2));
       console.log('📝 UserDashboard - Data validation:');
       console.log('📝 - Date format:', apiBookingData.date, 'Valid:', /^\d{4}-\d{2}-\d{2}$/.test(apiBookingData.date));
       console.log('📝 - Time format:', apiBookingData.start_time, 'Valid:', /^\d{2}:\d{2}:\d{2}$/.test(apiBookingData.start_time));
       console.log('📝 - Duration:', apiBookingData.duration_minutes, 'Type:', typeof apiBookingData.duration_minutes);
+      console.log('📝 - Description:', apiBookingData.description ? `"${apiBookingData.description}"` : 'null');
+      console.log('📝 - Description included in payload:', 'description' in apiBookingData);
       console.log('📝 - Token present:', !!localStorage.getItem('token'));
       console.log('📝 - API URL:', import.meta.env.VITE_API_URL + '/bookings');
       
@@ -124,11 +131,28 @@ function UserDashboard() {
         errorMessage = 'Invalid booking data. Please check your date, time, and duration.';
       } else if (err.response?.status === 401) {
         errorMessage = 'Authentication failed. Please try logging in again.';
+      } else if (err.response?.status === 400) {
+        // Handle 400 errors (like time slot conflicts)
+        errorMessage = err.response?.data?.detail || 'Unable to create booking. The time slot may no longer be available.';
       }
       
       toast.error(errorMessage, {
         duration: 8000,
       });
+      
+      // If it's a time slot conflict, clear the pending booking so user can try again
+      if (err.response?.status === 400 && err.response?.data?.detail?.includes('Conflicts with existing booking')) {
+        localStorage.removeItem('pendingBooking');
+        setHasPendingBooking(false);
+        
+        // Show additional helpful message
+        setTimeout(() => {
+          toast('Please select a different time slot from the available slots below.', {
+            duration: 6000,
+            icon: 'ℹ️',
+          });
+        }, 1000);
+      }
     }
   };
 

@@ -66,7 +66,8 @@ function Login() {
       const apiBookingData = {
         date: bookingData.date,
         start_time: bookingData.startTime + ':00', // Add seconds if not present
-        duration_minutes: bookingData.duration
+        duration_minutes: bookingData.duration,
+        description: bookingData.description || null
       };
 
       console.log('📝 Sending pending booking to API:', apiBookingData);

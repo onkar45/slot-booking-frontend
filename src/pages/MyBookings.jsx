@@ -45,7 +45,7 @@ function MyBookings() {
     
     try {
       setCancellingId(selectedBooking.id);
-      await API.delete(`/bookings/${selectedBooking.id}`);
+      await API.patch(`/bookings/${selectedBooking.id}/cancel`);
       toast.success("Booking cancelled successfully!", {
         duration: 3000,
         icon: '✅',
@@ -251,6 +251,16 @@ function MyBookings() {
                     </div>
 
                     <div className="pt-4 border-t border-gray-200/50 dark:border-gray-600/50">
+                      {booking.description && (
+                        <div className="mb-3">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-2">
+                            Description:
+                          </p>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 font-medium bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                            {booking.description}
+                          </p>
+                        </div>
+                      )}
                       <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                         Booked on: {new Date(booking.created_at).toLocaleDateString('en-US', { 
                           year: 'numeric', 
