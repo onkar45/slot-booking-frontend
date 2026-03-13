@@ -12,17 +12,19 @@ function AdminNavbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
     logout();
     toast.success('Logged out successfully!');
+    setShowLogoutModal(false);
     setTimeout(() => navigate("/"), 500);
   };
 
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 bg-gray-900/95 dark:bg-gray-950/95 text-white backdrop-blur-md shadow-lg transition-colors duration-200">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/95 dark:bg-gray-950/95 text-white backdrop-blur-md shadow-lg transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -80,7 +82,7 @@ function AdminNavbar() {
             </div>
 
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogoutModal(true)}
               className="bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-600 transition duration-200 font-medium flex items-center gap-2"
             >
               <FiLogOut className="w-4 h-4" />
@@ -152,7 +154,7 @@ function AdminNavbar() {
 
             <button
               onClick={() => {
-                handleLogout();
+                setShowLogoutModal(true);
                 setMobileMenuOpen(false);
               }}
               className="w-full bg-red-500 text-white px-4 py-3 rounded-lg hover:bg-red-600 transition duration-200 font-medium flex items-center justify-center gap-2"
@@ -163,6 +165,59 @@ function AdminNavbar() {
           </div>
         )}
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div 
+          className="fixed w-screen h-screen z-[9999] bg-black/50"
+          onClick={() => setShowLogoutModal(false)}
+          style={{ 
+            top: 0,
+            left: 0,
+            margin: 0,
+            padding: 0
+          }}
+        >
+          <div 
+            className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full p-6"
+            style={{ 
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              maxWidth: '28rem'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                <FiLogOut className="h-7 w-7 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                Confirm Logout
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                Are you sure you want to logout? You will need to login again to access your dashboard.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowLogoutModal(false)}
+                  className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  <FiLogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

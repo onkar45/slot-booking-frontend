@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import AdminNavbar from '../components/AdminNavbar';
 import API from '../services/api';
-import { FiCheckCircle, FiXCircle, FiClock, FiCalendar, FiUser, FiSearch } from 'react-icons/fi';
+import { FiCheckCircle, FiXCircle, FiClock, FiCalendar, FiUser, FiSearch, FiLock, FiTrash2 } from 'react-icons/fi';
 
 function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
@@ -11,10 +11,20 @@ function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('latest');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Block Date States
+  const [blockedDates, setBlockedDates] = useState([]);
+  const [blockDateInput, setBlockDateInput] = useState('');
+  const [blockReasonInput, setBlockReasonInput] = useState('');
+  const [blockingDate, setBlockingDate] = useState(false);
+  const [loadingBlockedDates, setLoadingBlockedDates] = useState(false);
+  const [showBlockDayModal, setShowBlockDayModal] = useState(false);
+  
   const ITEMS_PER_PAGE = 3;
 
   useEffect(() => {
     fetchBookings();
+    fetchBlockedDates();
   }, []);
 
   const fetchBookings = async () => {
@@ -120,6 +130,55 @@ function AdminDashboard() {
     }
   };
 
+  // Fetch blocked dates
+  const fetchBlockedDates = async () => {
+    try {
+      setLoadingBlockedDates(true);
+      const res = await API.get('/admin/blocked-dates');
+      setBlockedDates(res.data || []);
+    } catch (err) {
+      console.error('Error fetching blocked dates:', err);
+      toast.error('Failed to load blocked dates');
+    } finally {
+      setLoadingBlockedDates(false);
+    }
+  };
+
+  // Block a date
+  const handleBlockDate = async () => {
+    if (!blockDateInput) {
+      toast.error('Please select a date');
+      return;
+    }
+
+    try {
+      setBlockingDate(true);
+      await API.post('/admin/block-date', {
+        date: blockDateInput,
+        reason: blockReasonInput || 'No reason provided'
+      });
+      toast.success('Date blocked successfully!');
+      setBlockDateInput('');
+      setBlockReasonInput('');
+      fetchBlockedDates();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Error blocking date');
+    } finally {
+      setBlockingDate(false);
+    }
+  };
+
+  // Unblock a date
+  const handleUnblockDate = async (id) => {
+    try {
+      await API.delete(`/admin/unblock-date/${id}`);
+      toast.success('Date unblocked successfully!');
+      fetchBlockedDates();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Error unblocking date');
+    }
+  };
+
   const getStatusStyle = (status) => {
     if (status === "approved")
       return "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-green-500/30";
@@ -187,7 +246,7 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 relative overflow-hidden pt-20">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
@@ -200,9 +259,18 @@ function AdminDashboard() {
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <div className="mb-8">
-          <div>
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2">All Bookings</h2>
-            <p className="text-gray-600 dark:text-gray-300 font-medium text-lg">View and manage all booking requests</p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2">All Bookings</h2>
+              <p className="text-gray-600 dark:text-gray-300 font-medium text-lg">View and manage all booking requests</p>
+            </div>
+            <button
+              onClick={() => setShowBlockDayModal(true)}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2 whitespace-nowrap"
+            >
+              <FiLock className="w-5 h-5" />
+              Block Whole Day
+            </button>
           </div>
         </div>
         
@@ -314,71 +382,81 @@ function AdminDashboard() {
           </div>
         ) : (
           <>
-            <div className="space-y-6">
+            <div className="space-y-4">
               {currentBookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 p-6 sm:p-8 border border-white/20 dark:border-gray-700/20 transform hover:-translate-y-1"
+                  className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-4 sm:p-5 border border-white/20 dark:border-gray-700/20 transform hover:-translate-y-0.5"
                 >
-                  <div className="flex flex-col gap-6">
-                    <div className="space-y-4 flex-1">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="flex flex-col gap-4">
+                    <div className="space-y-3 flex-1">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center mb-2 font-medium">
-                            <FiUser className="w-5 h-5 mr-2" />
+                          <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center mb-1.5 font-medium">
+                            <FiUser className="w-4 h-4 mr-1.5" />
                             User
                           </p>
-                          <p className="font-bold text-gray-900 dark:text-white text-lg">
+                          <p className="font-bold text-gray-900 dark:text-white text-base">
                             {booking.user?.name || booking.user?.email || 'N/A'}
                           </p>
                         </div>
                         
                         <div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center mb-2 font-medium">
-                            <FiCalendar className="w-5 h-5 mr-2" />
+                          <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center mb-1.5 font-medium">
+                            <FiCalendar className="w-4 h-4 mr-1.5" />
                             Date
                           </p>
-                          <p className="font-bold text-gray-900 dark:text-white text-lg">
+                          <p className="font-bold text-gray-900 dark:text-white text-base">
                             {formatDate(booking.date || booking.booking_date)}
                           </p>
                         </div>
                         
                         <div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center mb-2 font-medium">
-                            <FiClock className="w-5 h-5 mr-2" />
+                          <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center mb-1.5 font-medium">
+                            <FiClock className="w-4 h-4 mr-1.5" />
                             Time Slot
                           </p>
-                          <p className="font-bold text-gray-800 dark:text-gray-200 text-lg">
+                          <p className="font-bold text-gray-800 dark:text-gray-200 text-base">
                             {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
                           </p>
                         </div>
                         
                         <div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center mb-2 font-medium">
-                            <FiClock className="w-5 h-5 mr-2" />
+                          <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center mb-1.5 font-medium">
+                            <FiClock className="w-4 h-4 mr-1.5" />
                             Booked On
                           </p>
-                          <p className="font-bold text-gray-800 dark:text-gray-200 text-lg">
+                          <p className="font-bold text-gray-800 dark:text-gray-200 text-base">
                             {new Date(booking.created_at).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
 
+                      {/* Company Information Section - Extra Compact */}
+                      {booking.company_name && (
+                        <div className="mt-2 pt-2 border-t border-gray-200/50 dark:border-gray-600/50">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 font-medium">Company:</p>
+                          <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-700/50 rounded-md px-2.5 py-1.5">
+                            {booking.company_name}
+                          </p>
+                        </div>
+                      )}
+
                       {/* Description */}
-                      <div className="mt-4 pt-4 border-t border-gray-200/50 dark:border-gray-600/50">
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 font-medium">Description:</p>
-                        <p className="text-base text-gray-700 dark:text-gray-300 font-medium bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                      <div className="mt-3 pt-3 border-t border-gray-200/50 dark:border-gray-600/50">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-1.5 font-medium">Description:</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 font-medium bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
                           {booking.description || 'No description provided'}
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 font-medium">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
                           Duration: {getBookingDescription(booking)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-2">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-2">
                       <span
-                        className={`inline-flex items-center px-6 py-3 rounded-2xl text-sm font-black shadow-lg ${getStatusStyle(
+                        className={`inline-flex items-center px-4 py-2 rounded-xl text-xs font-black shadow-md ${getStatusStyle(
                           booking.status
                         )}`}
                       >
@@ -386,19 +464,19 @@ function AdminDashboard() {
                       </span>
 
                       {booking.status === 'pending' && (
-                        <div className="flex gap-3 w-full sm:w-auto">
+                        <div className="flex gap-2 w-full sm:w-auto">
                           <button
                             onClick={() => handleApprove(booking.id)}
-                            className="flex-1 sm:flex-none bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-2xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 font-bold text-sm flex items-center justify-center shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transform hover:-translate-y-0.5"
+                            className="flex-1 sm:flex-none bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 font-bold text-xs flex items-center justify-center shadow-md shadow-green-500/30 hover:shadow-lg hover:shadow-green-500/40 transform hover:-translate-y-0.5"
                           >
-                            <FiCheckCircle className="mr-2 w-5 h-5" />
+                            <FiCheckCircle className="mr-1.5 w-4 h-4" />
                             Approve
                           </button>
                           <button
                             onClick={() => handleReject(booking.id)}
-                            className="flex-1 sm:flex-none bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-2xl hover:from-red-600 hover:to-red-700 transition-all duration-300 font-bold text-sm flex items-center justify-center shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transform hover:-translate-y-0.5"
+                            className="flex-1 sm:flex-none bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-300 font-bold text-xs flex items-center justify-center shadow-md shadow-red-500/30 hover:shadow-lg hover:shadow-red-500/40 transform hover:-translate-y-0.5"
                           >
-                            <FiXCircle className="mr-2 w-5 h-5" />
+                            <FiXCircle className="mr-1.5 w-4 h-4" />
                             Reject
                           </button>
                         </div>
@@ -477,6 +555,138 @@ function AdminDashboard() {
           </>
         )}
       </div>
+
+      {/* Block Day Modal */}
+      {showBlockDayModal && (
+        <div 
+          className="fixed w-screen h-screen z-[9999] bg-black/50"
+          onClick={() => setShowBlockDayModal(false)}
+          style={{ 
+            top: 0,
+            left: 0,
+            margin: 0,
+            padding: 0
+          }}
+        >
+          <div 
+            className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-auto"
+            style={{ 
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              maxWidth: '56rem'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <FiLock className="w-6 h-6 text-red-600 dark:text-red-400" />
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white">Block Whole Day</h3>
+                </div>
+                <button
+                  onClick={() => setShowBlockDayModal(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Select Date
+                  </label>
+                  <input
+                    type="date"
+                    value={blockDateInput}
+                    onChange={(e) => setBlockDateInput(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm font-medium shadow-lg"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Reason (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={blockReasonInput}
+                    onChange={(e) => setBlockReasonInput(e.target.value)}
+                    placeholder="e.g., Holiday, Maintenance"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm font-medium shadow-lg"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleBlockDate}
+                disabled={blockingDate || !blockDateInput}
+                className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-6"
+              >
+                <FiLock className="w-4 h-4" />
+                {blockingDate ? 'Blocking...' : 'Block Day'}
+              </button>
+
+              {/* Blocked Dates Table */}
+              <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Blocked Dates</h4>
+                
+                {loadingBlockedDates ? (
+                  <div className="text-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-red-600 border-t-transparent"></div>
+                  </div>
+                ) : blockedDates.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    No blocked dates
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-200 dark:border-gray-700">
+                          <th className="text-left py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-300">Date</th>
+                          <th className="text-left py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-300">Reason</th>
+                          <th className="text-left py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-300">Created At</th>
+                          <th className="text-center py-3 px-4 text-sm font-bold text-gray-700 dark:text-gray-300">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {blockedDates.map((blocked) => (
+                          <tr key={blocked.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <td className="py-3 px-4 text-sm font-medium text-gray-900 dark:text-white">
+                              {formatDate(blocked.date)}
+                            </td>
+                            <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
+                              {blocked.reason || 'No reason'}
+                            </td>
+                            <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-400">
+                              {formatDate(blocked.created_at)}
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <button
+                                onClick={() => handleUnblockDate(blocked.id)}
+                                className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold text-xs shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center gap-2 mx-auto"
+                              >
+                                <FiTrash2 className="w-3 h-3" />
+                                Unblock
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

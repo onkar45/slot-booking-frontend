@@ -148,7 +148,7 @@ function MyBookings() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 relative overflow-hidden pt-20">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
@@ -251,6 +251,41 @@ function MyBookings() {
                     </div>
 
                     <div className="pt-4 border-t border-gray-200/50 dark:border-gray-600/50">
+                      {/* Contact Information Section */}
+                      {(booking.company_name || booking.hr_name || booking.mobile_number || booking.email_id) && (
+                        <div className="mb-4">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 font-semibold mb-3">
+                            Contact Information:
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {booking.company_name && (
+                              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2.5">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Company</p>
+                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{booking.company_name}</p>
+                              </div>
+                            )}
+                            {booking.hr_name && (
+                              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2.5">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">HR Name</p>
+                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{booking.hr_name}</p>
+                              </div>
+                            )}
+                            {booking.mobile_number && (
+                              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2.5">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Mobile</p>
+                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{booking.mobile_number}</p>
+                              </div>
+                            )}
+                            {booking.email_id && (
+                              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2.5">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Email</p>
+                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{booking.email_id}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {booking.description && (
                         <div className="mb-3">
                           <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-2">

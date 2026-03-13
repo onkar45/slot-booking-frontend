@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiX, FiCalendar, FiClock, FiAlertTriangle } from 'react-icons/fi';
+import { FiX, FiCalendar, FiClock, FiAlertTriangle, FiBriefcase, FiUser, FiPhone, FiMail } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import API from '../services/api';
 
@@ -8,6 +8,10 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
     date: '',
     start_time: '',
     duration: 30,
+    companyName: '',
+    hrName: '',
+    mobileNumber: '',
+    emailId: '',
     description: ''
   });
   const [errors, setErrors] = useState({});
@@ -119,6 +123,26 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
       }
     }
 
+    if (!formData.companyName.trim()) {
+      newErrors.companyName = 'Company name is required';
+    }
+
+    if (!formData.hrName.trim()) {
+      newErrors.hrName = 'HR name is required';
+    }
+
+    if (!formData.mobileNumber.trim()) {
+      newErrors.mobileNumber = 'Mobile number is required';
+    } else if (!/^\d{10}$/.test(formData.mobileNumber.trim())) {
+      newErrors.mobileNumber = 'Please enter a valid 10-digit mobile number';
+    }
+
+    if (!formData.emailId.trim()) {
+      newErrors.emailId = 'Email ID is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailId.trim())) {
+      newErrors.emailId = 'Please enter a valid email address';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -138,6 +162,10 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
         date: formData.date,
         start_time: formData.start_time + ':00',
         duration_minutes: formData.duration,
+        company_name: formData.companyName.trim() || null,
+        hr_name: formData.hrName.trim() || null,
+        mobile_number: formData.mobileNumber.trim() || null,
+        email_id: formData.emailId.trim() || null,
         description: formData.description.trim() || null
       };
 
@@ -221,6 +249,10 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
       date: '',
       start_time: '',
       duration: 30,
+      companyName: '',
+      hrName: '',
+      mobileNumber: '',
+      emailId: '',
       description: ''
     });
     setErrors({});
@@ -351,6 +383,116 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* New Fields Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Company Name */}
+              <div>
+                <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <FiBriefcase className="mr-2 flex-shrink-0" />
+                  Company Name <span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  placeholder="Enter company name"
+                  className={`w-full border rounded-xl px-4 py-3 focus:ring-2 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700 ${
+                    errors.companyName
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500 dark:border-red-500'
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
+                  }`}
+                />
+                {errors.companyName && (
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-2 flex items-center">
+                    <FiAlertTriangle className="w-4 h-4 mr-1 flex-shrink-0" />
+                    {errors.companyName}
+                  </p>
+                )}
+              </div>
+
+              {/* HR Name */}
+              <div>
+                <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <FiUser className="mr-2 flex-shrink-0" />
+                  HR Name <span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="hrName"
+                  value={formData.hrName}
+                  onChange={handleChange}
+                  placeholder="Enter HR name"
+                  className={`w-full border rounded-xl px-4 py-3 focus:ring-2 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700 ${
+                    errors.hrName
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500 dark:border-red-500'
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
+                  }`}
+                />
+                {errors.hrName && (
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-2 flex items-center">
+                    <FiAlertTriangle className="w-4 h-4 mr-1 flex-shrink-0" />
+                    {errors.hrName}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Mobile Number */}
+              <div>
+                <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <FiPhone className="mr-2 flex-shrink-0" />
+                  Mobile Number <span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                  type="tel"
+                  name="mobileNumber"
+                  value={formData.mobileNumber}
+                  onChange={handleChange}
+                  placeholder="Enter 10-digit mobile number"
+                  maxLength="10"
+                  className={`w-full border rounded-xl px-4 py-3 focus:ring-2 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700 ${
+                    errors.mobileNumber
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500 dark:border-red-500'
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
+                  }`}
+                />
+                {errors.mobileNumber && (
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-2 flex items-center">
+                    <FiAlertTriangle className="w-4 h-4 mr-1 flex-shrink-0" />
+                    {errors.mobileNumber}
+                  </p>
+                )}
+              </div>
+
+              {/* Email ID */}
+              <div>
+                <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <FiMail className="mr-2 flex-shrink-0" />
+                  Email ID <span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="emailId"
+                  value={formData.emailId}
+                  onChange={handleChange}
+                  placeholder="Enter email address"
+                  className={`w-full border rounded-xl px-4 py-3 focus:ring-2 outline-none transition-all duration-200 text-gray-700 dark:text-gray-300 dark:bg-gray-700 ${
+                    errors.emailId
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500 dark:border-red-500'
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
+                  }`}
+                />
+                {errors.emailId && (
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-2 flex items-center">
+                    <FiAlertTriangle className="w-4 h-4 mr-1 flex-shrink-0" />
+                    {errors.emailId}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Description Textarea */}

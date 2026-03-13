@@ -9,6 +9,7 @@ function CustomCalendar({ onOpenBookingModal }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentWeekStart, setCurrentWeekStart] = useState(0); // Offset from today
+  const [blockedDates, setBlockedDates] = useState([]);
   const { user } = useContext(AuthContext);
   const isLoggedIn = !!localStorage.getItem('token');
 
@@ -17,10 +18,15 @@ function CustomCalendar({ onOpenBookingModal }) {
   today.setHours(0, 0, 0, 0);
 
   useEffect(() => {
-    fetchBookingsAndGenerateSlots();
+    const initializeCalendar = async () => {
+      const blockedDatesList = await fetchBlockedDates();
+      await fetchBookingsAndGenerateSlots(blockedDatesList);
+    };
+    
+    initializeCalendar();
     
     const intervalId = setInterval(() => {
-      fetchBookingsAndGenerateSlots();
+      initializeCalendar();
     }, 5 * 60 * 1000);
     
     return () => clearInterval(intervalId);
@@ -89,7 +95,35 @@ function CustomCalendar({ onOpenBookingModal }) {
     });
   }
 
-  async function fetchBookingsAndGenerateSlots() {
+  /**
+   * Fetch blocked dates from admin
+   */
+  async function fetchBlockedDates() {
+    try {
+      // Use public endpoint to fetch blocked dates (no auth required)
+      const response = await API.get('/blocked-dates-public');
+      const blocked = response.data || [];
+      // Store just the date strings for easy lookup
+      const blockedDateStrings = blocked.map(b => b.date);
+      setBlockedDates(blockedDateStrings);
+      console.log('🚫 Fetched blocked dates:', blockedDateStrings);
+      return blockedDateStrings;
+    } catch (error) {
+      console.error('Error fetching blocked dates:', error);
+      // If error (endpoint doesn't exist yet), just set empty array
+      setBlockedDates([]);
+      return [];
+    }
+  }
+
+  /**
+   * Check if a date is blocked
+   */
+  function isDateBlocked(dateStr, blockedDatesList) {
+    return blockedDatesList.includes(dateStr);
+  }
+
+  async function fetchBookingsAndGenerateSlots(blockedDatesList = []) {
     try {
       setLoading(true);
       const response = await API.get('/bookings/approved-public');
@@ -134,6 +168,7 @@ function CustomCalendar({ onOpenBookingModal }) {
           // Check if this slot overlaps with any booking
           const isBooked = checkSlotOverlap(slotStart, slotEnd, dayBookingRanges);
           const isExpired = isPastSlot(dateStr, startTime24);
+          const isBlocked = isDateBlocked(dateStr, blockedDatesList);
 
           // Debug logging for multi-hour bookings
           if (dayBookingRanges.length > 0 && hour >= 18 && hour <= 20) { // Focus on 6-8 PM range
@@ -151,7 +186,8 @@ function CustomCalendar({ onOpenBookingModal }) {
           }
 
           let status = 'available';
-          if (isBooked) status = 'booked';
+          if (isBlocked) status = 'blocked';
+          else if (isBooked) status = 'booked';
           else if (isExpired) status = 'expired';
 
           allSlots.push({
@@ -167,7 +203,14 @@ function CustomCalendar({ onOpenBookingModal }) {
       console.log('📅 CustomCalendar - Generated', allSlots.length, 'calendar slots');
       console.log('🔴 Booked slots:', allSlots.filter(s => s.status === 'booked').length);
       console.log('🟢 Available slots:', allSlots.filter(s => s.status === 'available').length);
+      console.log('🚫 Blocked slots:', allSlots.filter(s => s.status === 'blocked').length);
       console.log('⏰ Expired slots:', allSlots.filter(s => s.status === 'expired').length);
+      
+      // Debug: Show which dates have blocked slots
+      const blockedSlots = allSlots.filter(s => s.status === 'blocked');
+      if (blockedSlots.length > 0) {
+        console.log('🚫 Blocked slot details:', blockedSlots.map(s => ({ date: s.date, time: s.time })));
+      }
 
       setEvents(allSlots);
     } catch (err) {
@@ -185,6 +228,10 @@ function CustomCalendar({ onOpenBookingModal }) {
   }
 
   function handleSlotClick(slot) {
+    if (slot.status === 'blocked') {
+      toast.error('This date has been blocked by admin');
+      return;
+    }
     if (slot.status === 'booked') {
       toast.error('Slot is already booked');
       return;
@@ -269,7 +316,11 @@ function CustomCalendar({ onOpenBookingModal }) {
           </div>
           <div className="legend-item">
             <div className="legend-dot bg-gradient-danger"></div>
-            <span>Booked</span>
+            <span>Booked ({events.filter(e => e.status === 'booked' && visibleDays.some(day => day.dateStr === e.date)).length})</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-dot bg-amber-500"></div>
+            <span>Blocked</span>
           </div>
           <div className="legend-item">
             <div className="legend-dot bg-gray-400"></div>
@@ -339,7 +390,10 @@ function CustomCalendar({ onOpenBookingModal }) {
                     let slotClass = 'slot-available';
                     let displayText = time12;
 
-                    if (slot.status === 'booked') {
+                    if (slot.status === 'blocked') {
+                      slotClass = 'slot-blocked';
+                      displayText = 'Blocked';
+                    } else if (slot.status === 'booked') {
                       slotClass = 'slot-booked';
                       displayText = 'Booked';
                     } else if (slot.status === 'expired') {

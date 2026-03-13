@@ -67,6 +67,10 @@ function Login() {
         date: bookingData.date,
         start_time: bookingData.startTime + ':00', // Add seconds if not present
         duration_minutes: bookingData.duration,
+        company_name: bookingData.companyName || null,
+        hr_name: bookingData.hrName || null,
+        mobile_number: bookingData.mobileNumber || null,
+        email_id: bookingData.emailId || null,
         description: bookingData.description || null
       };
 
@@ -118,7 +122,9 @@ function Login() {
         await processPendingBooking();
         
         const userRole = localStorage.getItem('role');
-        if (userRole === "admin") {
+        if (userRole === "super_admin") {
+          navigate("/super-admin");
+        } else if (userRole === "admin") {
           navigate("/admin");
         } else {
           navigate("/user");
