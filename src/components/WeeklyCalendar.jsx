@@ -11,6 +11,8 @@ function WeeklyCalendar({ onOpenBookingModal }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [arrowTop, setArrowTop] = useState(null);
+  const calendarRef = useState(null);
   const { user } = useContext(AuthContext);
   const isLoggedIn = !!localStorage.getItem('token');
 
@@ -27,6 +29,53 @@ function WeeklyCalendar({ onOpenBookingModal }) {
 
   const todayStr = formatDate(today);
   const endDateStr = formatDate(endDate);
+
+  // Update arrow position every minute
+  useEffect(() => {
+    const updateArrow = () => {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const calendarStartHour = 9;
+      const calendarEndHour = 22;
+      const currentDecimalHour = hours + minutes / 60;
+
+      if (currentDecimalHour < calendarStartHour || currentDecimalHour > calendarEndHour) {
+        setArrowTop(null);
+        return;
+      }
+
+      // Use FullCalendar's actual slot rows to compute pixel position
+      const slotRows = document.querySelectorAll('.fc-timegrid-slot[data-time]');
+      if (slotRows.length < 2) return;
+
+      // Find the 9:00:00 slot
+      let startSlot = null;
+      slotRows.forEach(row => {
+        if (row.getAttribute('data-time') === '09:00:00') startSlot = row;
+      });
+      if (!startSlot) startSlot = slotRows[0];
+
+      const slotHeight = startSlot.getBoundingClientRect().height;
+      if (!slotHeight) return;
+
+      const container = document.querySelector('.calendar-card-premium');
+      if (!container) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const startSlotRect = startSlot.getBoundingClientRect();
+
+      const offsetFromContainer = startSlotRect.top - containerRect.top;
+      const hoursFromStart = currentDecimalHour - calendarStartHour;
+      const topPx = offsetFromContainer + hoursFromStart * slotHeight;
+
+      setArrowTop(topPx);
+    };
+
+    const timeout = setTimeout(updateArrow, 600); // wait for DOM
+    const interval = setInterval(updateArrow, 60 * 1000);
+    return () => { clearTimeout(timeout); clearInterval(interval); };
+  }, [events]); // re-run after events render
 
   useEffect(() => {
     fetchBookingsAndGenerateSlots();
@@ -458,7 +507,26 @@ function WeeklyCalendar({ onOpenBookingModal }) {
       </div>
 
       {/* Calendar - Week View with Navigation */}
-      <div className="calendar-card-premium bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-[20px] shadow-2xl shadow-gray-200/50 dark:shadow-gray-900/50 border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+      <div className="calendar-card-premium bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-[20px] shadow-2xl shadow-gray-200/50 dark:shadow-gray-900/50 border border-gray-200/50 dark:border-gray-700/50 overflow-hidden relative">
+        
+        {/* Current time arrow indicator in the time label column */}
+        {arrowTop !== null && (
+          <div
+            className="absolute left-0 z-20 pointer-events-none flex items-center"
+            style={{ top: `${arrowTop}px`, transform: 'translateY(-50%)' }}
+          >
+            <div
+              style={{
+                width: 0,
+                height: 0,
+                borderTop: '6px solid transparent',
+                borderBottom: '6px solid transparent',
+                borderLeft: '10px solid #f97316',
+                marginLeft: '2px'
+              }}
+            />
+          </div>
+        )}
         <FullCalendar
           plugins={[timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"

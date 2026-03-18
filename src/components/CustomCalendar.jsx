@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useRef } from 'react';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import API from '../services/api';
 import { AuthContext } from '../context/AuthContext';
@@ -8,10 +8,57 @@ import '../calendar-premium.css';
 function CustomCalendar({ onOpenBookingModal }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentWeekStart, setCurrentWeekStart] = useState(0); // Offset from today
+  const [currentWeekStart, setCurrentWeekStart] = useState(0);
   const [blockedDates, setBlockedDates] = useState([]);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [arrowTopPx, setArrowTopPx] = useState(null);
+  const timeSlotsRef = useRef(null);
   const { user } = useContext(AuthContext);
   const isLoggedIn = !!localStorage.getItem('token');
+
+  // Update current time every minute and recalculate arrow position
+  useEffect(() => {
+    const updateArrow = () => {
+      const now = new Date();
+      setCurrentTime(now);
+
+      if (!timeSlotsRef.current) return;
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const calendarStart = 9;
+      const calendarEnd = 22;
+      const currentDecimal = hours + minutes / 60;
+
+      if (currentDecimal < calendarStart || currentDecimal > calendarEnd) {
+        setArrowTopPx(null);
+        return;
+      }
+
+      // Get actual row elements to measure real positions including gaps
+      const rows = timeSlotsRef.current.querySelectorAll('[data-hour-row]');
+      if (rows.length < 2) return;
+
+      const containerTop = timeSlotsRef.current.getBoundingClientRect().top;
+      const currentHour = Math.floor(currentDecimal);
+      const minuteFraction = minutes / 60;
+
+      // Find the row for current hour and next hour
+      const currentRowIndex = currentHour - calendarStart;
+      if (currentRowIndex < 0 || currentRowIndex >= rows.length) return;
+
+      const currentRowTop = rows[currentRowIndex].getBoundingClientRect().top - containerTop;
+      const nextRowTop = currentRowIndex + 1 < rows.length
+        ? rows[currentRowIndex + 1].getBoundingClientRect().top - containerTop
+        : currentRowTop + rows[currentRowIndex].getBoundingClientRect().height;
+
+      const topPx = currentRowTop + minuteFraction * (nextRowTop - currentRowTop);
+      setArrowTopPx(topPx);
+    };
+
+    const timeout = setTimeout(updateArrow, 300);
+    const interval = setInterval(updateArrow, 60 * 1000);
+    return () => { clearTimeout(timeout); clearInterval(interval); };
+  }, []);
 
   // Date range: TODAY + next 15 days
   const today = new Date();
@@ -366,14 +413,31 @@ function CustomCalendar({ onOpenBookingModal }) {
             })}
           </div>
 
-          {/* Time Slots Grid */}
-          <div className="space-y-1.5">
+          {/* Time Slots Grid - relative container for arrow */}
+          <div className="space-y-1.5 relative" ref={timeSlotsRef}>
+
+            {/* Floating time indicator arrow */}
+            {currentWeekStart === 0 && arrowTopPx !== null && (
+              <div
+                className="absolute pointer-events-none z-10"
+                style={{ top: `${arrowTopPx}px`, left: '-12px', transform: 'translateY(-50%)' }}
+              >
+                <div style={{
+                  width: 0,
+                  height: 0,
+                  borderTop: '6px solid transparent',
+                  borderBottom: '6px solid transparent',
+                  borderLeft: '9px solid #f97316',
+                }} />
+              </div>
+            )}
+
             {hours.map((hour) => {
               const time24 = `${String(hour).padStart(2, '0')}:00:00`;
               const time12 = formatTo12Hour(time24);
 
               return (
-                <div key={hour} className="grid gap-1.5" style={{ gridTemplateColumns: `70px repeat(${visibleDays.length}, minmax(100px, 1fr))` }}>
+                <div key={hour} data-hour-row={hour} className="grid gap-1.5" style={{ gridTemplateColumns: `70px repeat(${visibleDays.length}, minmax(100px, 1fr))` }}>
                   {/* Time Label */}
                   <div className="time-label flex items-center justify-end">
                     {time12}

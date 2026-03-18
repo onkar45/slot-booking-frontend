@@ -849,3 +849,16 @@
     transform: translateX(2px);
   }
 }
+
+/* FullCalendar Now Indicator */
+.fc .fc-now-indicator-line {
+  border-color: #f97316 !important;
+  border-width: 2px !important;
+  z-index: 10 !important;
+}
+
+.fc .fc-now-indicator-arrow {
+  border-top-color: #f97316 !important;
+  border-width: 6px !important;
+  z-index: 10 !important;
+}
