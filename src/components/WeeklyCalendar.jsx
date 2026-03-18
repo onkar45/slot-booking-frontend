@@ -259,26 +259,8 @@ function WeeklyCalendar({ onOpenBookingModal }) {
           const eventStart = `${dateStr}T${startTime24}`;
           const eventEnd = `${dateStr}T${endTime24}`;
 
-          if (isBooked) {
-            // BOOKED SLOT (RED)
-            allEvents.push({
-              id: `booked-${dateStr}-${hour}`,
-              title: 'Booked',
-              start: eventStart,
-              end: eventEnd,
-              backgroundColor: '#ef4444', // red-500
-              borderColor: '#ef4444',
-              textColor: '#ffffff',
-              classNames: ['booked-slot'],
-              extendedProps: {
-                type: 'booked',
-                date: dateStr,
-                time: startTime24,
-                hour: hour
-              }
-            });
-          } else if (isExpired) {
-            // EXPIRED SLOT (GREY)
+          if (isExpired) {
+            // EXPIRED SLOT (GREY) - takes priority over booked
             allEvents.push({
               id: `expired-${dateStr}-${hour}`,
               title: 'Expired',
@@ -290,6 +272,24 @@ function WeeklyCalendar({ onOpenBookingModal }) {
               classNames: ['expired-slot'],
               extendedProps: {
                 type: 'expired',
+                date: dateStr,
+                time: startTime24,
+                hour: hour
+              }
+            });
+          } else if (isBooked) {
+            // BOOKED SLOT (RED) - only if not expired
+            allEvents.push({
+              id: `booked-${dateStr}-${hour}`,
+              title: 'Booked',
+              start: eventStart,
+              end: eventEnd,
+              backgroundColor: '#ef4444', // red-500
+              borderColor: '#ef4444',
+              textColor: '#ffffff',
+              classNames: ['booked-slot'],
+              extendedProps: {
+                type: 'booked',
                 date: dateStr,
                 time: startTime24,
                 hour: hour
