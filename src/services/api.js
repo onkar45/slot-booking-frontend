@@ -1,34 +1,62 @@
 import axios from "axios";
+import { getOrganization, isLocalhost } from "../utils/getOrganization";
+
+/**
+ * Build base URL:
+ * - Dev (localhost): use VITE_API_URL env var (e.g. http://localhost:8000)
+ * - Prod: use same hostname with API port so backend reads Host header for org
+ *   e.g. frontend on tcs.cernsystem.com → API at https://tcs.cernsystem.com/api
+ *   OR a dedicated API domain from VITE_API_URL
+ */
+function getBaseURL() {
+  if (isLocalhost()) {
+    return import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  }
+  // Production: use configured API URL (e.g. https://api.cernsystem.com)
+  return import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}`;
+}
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://api.cernsystem.com",
+  baseURL: getBaseURL(),
+  withCredentials: true,
 });
 
-// Remove trailing slashes from URLs and add request logging
 API.interceptors.request.use((config) => {
+  // Attach JWT token
   const token = localStorage.getItem("token");
-
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  // Ensure clean URL without trailing slash
+  // In development only: send X-Org-Slug header (backend can't read subdomain on localhost)
+  // In production: backend reads org from Host/subdomain automatically
+  if (isLocalhost()) {
+    const orgSlug = getOrganization();
+    if (orgSlug) {
+      config.headers['X-Org-Slug'] = orgSlug;
+    }
+  }
+
+  // Clean trailing slashes
   if (config.url) {
-    config.url = config.url.replace(/\/+$/, ''); // Remove all trailing slashes
-    console.log('🌐 API Request:', config.method?.toUpperCase(), config.baseURL + config.url);
+    config.url = config.url.replace(/\/+$/, '');
   }
 
   return config;
 });
 
-// Add response interceptor for debugging
 API.interceptors.response.use(
-  (response) => {
-    console.log('✅ API Response:', response.status, response.config.url);
-    return response;
-  },
+  (response) => response,
   (error) => {
-    console.error('❌ API Error:', error.response?.status, error.config?.url, error.message);
+    if (error.response?.status === 401) {
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/login' && currentPath !== '/') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
+    }
     return Promise.reject(error);
   }
 );

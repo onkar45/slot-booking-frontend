@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ThemeContext } from "../context/ThemeContext";
+import { useOrg } from "../context/OrgContext";
 import toast from 'react-hot-toast';
 import { FiSun, FiMoon, FiMenu, FiX, FiLogOut } from 'react-icons/fi';
 import Logo from './Logo';
@@ -9,6 +10,7 @@ import Logo from './Logo';
 function Navbar() {
   const { logout, user, role } = useContext(AuthContext);
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const { org } = useOrg();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,7 +31,7 @@ function Navbar() {
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link to="/user" className="flex items-center hover:opacity-80 transition-opacity">
-            <Logo size="md" showText={true} />
+            <Logo size="md" showText={true} text={org?.name || 'SlotBook'} />
           </Link>
           
           {/* Desktop Menu */}

@@ -1,5 +1,6 @@
 import { createContext, useState, useContext } from "react";
 import api from "../services/api";
+import { clearOrganization } from "../utils/getOrganization";
 
 export const AuthContext = createContext();
 
@@ -47,7 +48,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.clear();
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('user');
+    clearOrganization();
     setRole(null);
     setUser(null);
   };

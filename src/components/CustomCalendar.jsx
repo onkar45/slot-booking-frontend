@@ -195,10 +195,13 @@ function CustomCalendar({ onOpenBookingModal }) {
 
       const allSlots = [];
       
-      for (let dayOffset = 0; dayOffset <= 15; dayOffset++) {
+      for (let dayOffset = 0; dayOffset <= 20; dayOffset++) {
         const currentDate = new Date(today);
         currentDate.setDate(today.getDate() + dayOffset);
         const dateStr = formatDate(currentDate);
+
+        // Days beyond 15 are unavailable (not bookable)
+        const isUnavailableDay = dayOffset > 15;
 
         // Filter bookings for current date to optimize overlap checks
         const dayBookingRanges = bookingRanges.filter(booking => booking.date === dateStr);
@@ -208,32 +211,16 @@ function CustomCalendar({ onOpenBookingModal }) {
           const endHour = hour + 1;
           const endTime24 = `${String(endHour).padStart(2, '0')}:00:00`;
 
-          // Create slot time range for overlap detection
           const slotStart = new Date(`${dateStr}T${startTime24}`);
           const slotEnd = new Date(`${dateStr}T${endTime24}`);
 
-          // Check if this slot overlaps with any booking
           const isBooked = checkSlotOverlap(slotStart, slotEnd, dayBookingRanges);
           const isExpired = isPastSlot(dateStr, startTime24);
           const isBlocked = isDateBlocked(dateStr, blockedDatesList);
 
-          // Debug logging for multi-hour bookings
-          if (dayBookingRanges.length > 0 && hour >= 18 && hour <= 20) { // Focus on 6-8 PM range
-            console.log(`🔍 CustomCalendar - Slot ${hour}:00-${hour+1}:00 on ${dateStr}:`, {
-              isBooked,
-              slotStart: slotStart.toTimeString().slice(0, 8),
-              slotEnd: slotEnd.toTimeString().slice(0, 8),
-              dayBookings: dayBookingRanges.map(b => ({
-                id: b.id,
-                start: b.start.toTimeString().slice(0, 8),
-                end: b.end.toTimeString().slice(0, 8),
-                overlaps: b.start < slotEnd && b.end > slotStart
-              }))
-            });
-          }
-
           let status = 'available';
-          if (isBlocked) status = 'blocked';
+          if (isUnavailableDay) status = 'unavailable';
+          else if (isBlocked) status = 'blocked';
           else if (isBooked) status = 'booked';
           else if (isExpired) status = 'expired';
 
@@ -275,6 +262,10 @@ function CustomCalendar({ onOpenBookingModal }) {
   }
 
   function handleSlotClick(slot) {
+    if (slot.status === 'unavailable') {
+      toast.error('Booking not available for this date');
+      return;
+    }
     if (slot.status === 'blocked') {
       toast.error('This date has been blocked by admin');
       return;
@@ -295,13 +286,14 @@ function CustomCalendar({ onOpenBookingModal }) {
 
   function getVisibleDays() {
     const days = [];
-    for (let i = currentWeekStart; i < currentWeekStart + 7 && i <= 15; i++) {
+    for (let i = currentWeekStart; i < currentWeekStart + 7 && i <= 20; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
       days.push({
         offset: i,
         date: date,
-        dateStr: formatDate(date)
+        dateStr: formatDate(date),
+        isUnavailable: i > 15
       });
     }
     return days;
@@ -390,7 +382,7 @@ function CustomCalendar({ onOpenBookingModal }) {
         </span>
         <button
           onClick={handleNextWeek}
-          disabled={currentWeekStart + 7 > 15}
+          disabled={currentWeekStart + 7 > 20}
           className="nav-button bg-gradient-info text-white border-0"
         >
           <FiChevronRight className="w-5 h-5" />
@@ -419,7 +411,8 @@ function CustomCalendar({ onOpenBookingModal }) {
             {/* Floating time indicator arrow */}
             {currentWeekStart === 0 && arrowTopPx !== null && (
               <div
-                className="absolute pointer-events-none z-10"
+                className="absolute z-10 cursor-pointer"
+                title={currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
                 style={{ top: `${arrowTopPx}px`, left: '-12px', transform: 'translateY(-50%)' }}
               >
                 <div style={{
@@ -454,7 +447,10 @@ function CustomCalendar({ onOpenBookingModal }) {
                     let slotClass = 'slot-available';
                     let displayText = time12;
 
-                    if (slot.status === 'blocked') {
+                    if (slot.status === 'unavailable') {
+                      slotClass = 'slot-expired';
+                      displayText = time12;
+                    } else if (slot.status === 'blocked') {
                       slotClass = 'slot-blocked';
                       displayText = 'Blocked';
                     } else if (slot.status === 'booked') {

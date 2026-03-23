@@ -6,14 +6,16 @@ function ProtectedRoute({ children, allowedRole }) {
   const { role } = useContext(AuthContext);
   const token = localStorage.getItem("token");
 
-  // If not logged in
   if (!token) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
 
-  // If role not allowed
   if (allowedRole && role !== allowedRole) {
-    return <Navigate to="/" replace />;
+    // Redirect to appropriate dashboard based on actual role
+    if (role === 'super_admin') return <Navigate to="/super-admin" replace />;
+    if (role === 'admin') return <Navigate to="/admin" replace />;
+    if (role === 'user') return <Navigate to="/user" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;

@@ -1,6 +1,6 @@
 import { FiCalendar } from 'react-icons/fi';
 
-function Logo({ size = 'md', showText = true }) {
+function Logo({ size = 'md', showText = true, text = 'SlotBook' }) {
   const sizes = {
     sm: 'w-8 h-8',
     md: 'w-10 h-10',
@@ -20,7 +20,7 @@ function Logo({ size = 'md', showText = true }) {
       </div>
       {showText && (
         <span className={`${textSizes[size]} font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent hidden sm:inline`}>
-          SlotBook
+          {text}
         </span>
       )}
     </div>

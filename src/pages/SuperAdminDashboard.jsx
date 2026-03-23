@@ -115,7 +115,7 @@ function SuperAdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 relative overflow-hidden pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 relative overflow-hidden lg:ml-56 pt-14 lg:pt-0">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -124,7 +124,7 @@ function SuperAdminDashboard() {
       <Toaster position="top-right" />
       <SuperAdminNavbar />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <div className="relative px-8 py-8">
         <div className="mb-8">
           <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2">Super Admin Dashboard</h2>
           <p className="text-gray-600 dark:text-gray-300 font-medium text-lg">System overview and management</p>

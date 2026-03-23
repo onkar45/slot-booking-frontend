@@ -1,5 +1,6 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { useOrg } from "../context/OrgContext";
 import API from "../services/api";
 import { useNavigate, Link } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast';
@@ -8,6 +9,7 @@ import PublicNavbar from "../components/PublicNavbar";
 
 function Login() {
   const { login } = useContext(AuthContext);
+  const { org } = useOrg();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -173,9 +175,9 @@ function Login() {
                     Smart Booking Solution
                   </div>
                   <h1 className="text-4xl xl:text-5xl font-black text-gray-900 dark:text-white leading-tight">
-                    Smart Scheduling
+                    {org?.name ? `Welcome to ${org.name}` : 'Smart Scheduling'}
                     <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent mt-2">
-                      Made Simple
+                      {org?.name ? 'Slot Booking' : 'Made Simple'}
                     </span>
                   </h1>
                   <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed font-medium">

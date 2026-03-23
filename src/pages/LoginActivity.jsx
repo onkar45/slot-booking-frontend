@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import SuperAdminNavbar from '../components/SuperAdminNavbar';
 import API from '../services/api';
-import { FiActivity, FiUser, FiClock, FiMonitor, FiMapPin, FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiActivity, FiUser, FiClock, FiMonitor, FiMapPin, FiSearch, FiChevronLeft, FiChevronRight, FiBriefcase } from 'react-icons/fi';
 
 function LoginActivity() {
   const navigate = useNavigate();
@@ -12,12 +12,24 @@ function LoginActivity() {
   const [users, setUsers] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
+  const [orgFilter, setOrgFilter] = useState('all');
+  const [orgs, setOrgs] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   useEffect(() => {
     fetchLoginActivity();
+    fetchOrgs();
   }, []);
+
+  const fetchOrgs = async () => {
+    try {
+      const res = await API.get('/super-admin/organizations');
+      setOrgs(res.data || []);
+    } catch {
+      // non-critical, ignore
+    }
+  };
 
   const fetchLoginActivity = async () => {
     try {
@@ -40,7 +52,7 @@ function LoginActivity() {
       }
 
       const res = await API.get('/super-admin/login-activity');
-      console.log('🔐 Login Activity Data:', res.data);
+      console.log('🔐 Login Activity sample:', res.data?.[0]);
       
       const activitiesData = res.data || [];
       
@@ -162,6 +174,9 @@ function LoginActivity() {
       activity.ip_address?.toLowerCase().includes(query)
     );
 
+    // Org filter
+    const matchesOrg = orgFilter === 'all' || activity.org_slug === orgFilter || activity.organization?.slug === orgFilter;
+
     // Date filter
     let matchesDate = true;
     if (dateFilter !== 'all') {
@@ -172,7 +187,7 @@ function LoginActivity() {
       }
     }
 
-    return matchesSearch && matchesDate;
+    return matchesSearch && matchesDate && matchesOrg;
   });
 
   // Pagination
@@ -184,10 +199,10 @@ function LoginActivity() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, dateFilter]);
+  }, [searchQuery, dateFilter, orgFilter]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 relative overflow-hidden pt-20">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 relative overflow-hidden lg:ml-56 pt-14 lg:pt-0">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -196,7 +211,7 @@ function LoginActivity() {
       <Toaster position="top-right" />
       <SuperAdminNavbar />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <div className="relative px-8 py-8">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <FiActivity className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -229,6 +244,18 @@ function LoginActivity() {
               <option value="month">This Month</option>
               <option value="last30">Last 30 Days</option>
             </select>
+            {orgs.length > 0 && (
+              <select
+                value={orgFilter}
+                onChange={(e) => setOrgFilter(e.target.value)}
+                className="px-6 py-4 rounded-2xl border border-white/20 dark:border-gray-700/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm font-medium shadow-lg"
+              >
+                <option value="all">All Organizations</option>
+                {orgs.map(o => (
+                  <option key={o.id} value={o.slug}>{o.name}</option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
 
@@ -257,6 +284,12 @@ function LoginActivity() {
                       <div className="flex items-center gap-2">
                         <FiUser className="w-4 h-4" />
                         User
+                      </div>
+                    </th>
+                    <th className="text-left py-4 px-6 text-sm font-bold text-gray-700 dark:text-gray-300">
+                      <div className="flex items-center gap-2">
+                        <FiBriefcase className="w-4 h-4" />
+                        Organization
                       </div>
                     </th>
                     <th className="text-left py-4 px-6 text-sm font-bold text-gray-700 dark:text-gray-300">
@@ -310,6 +343,16 @@ function LoginActivity() {
                               </>
                             )}
                           </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          {activity.organization?.name || activity.org_name ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                              <FiBriefcase className="w-3 h-3" />
+                              {activity.organization?.name || activity.org_name}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400 dark:text-gray-500">—</span>
+                          )}
                         </td>
                         <td className="py-4 px-6">
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">

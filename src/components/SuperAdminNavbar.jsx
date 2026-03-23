@@ -3,15 +3,27 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { ThemeContext } from "../context/ThemeContext";
 import toast from 'react-hot-toast';
-import { FiSun, FiMoon, FiMenu, FiX, FiLogOut } from 'react-icons/fi';
-import Logo from './Logo';
+import {
+  FiSun, FiMoon, FiMenu, FiX, FiLogOut,
+  FiGrid, FiBriefcase, FiCalendar, FiTrendingUp,
+  FiActivity, FiSettings
+} from 'react-icons/fi';
+
+const navLinks = [
+  { path: '/super-admin',                   label: 'Dashboard',         icon: FiGrid },
+  { path: '/super-admin/organizations',     label: 'Organizations',     icon: FiBriefcase },
+  { path: '/super-admin/user-bookings',     label: 'User Bookings',     icon: FiCalendar },
+  { path: '/super-admin/company-analytics', label: 'Company Analytics', icon: FiTrendingUp },
+  { path: '/super-admin/login-activity',    label: 'Login Activity',    icon: FiActivity },
+  { path: '/super-admin/manage-slots',      label: 'Manage Slots',      icon: FiSettings },
+];
 
 function SuperAdminNavbar() {
-  const { logout, user, role } = useContext(AuthContext);
+  const { logout, user } = useContext(AuthContext);
   const { theme, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
@@ -23,167 +35,138 @@ function SuperAdminNavbar() {
 
   const isActive = (path) => location.pathname === path;
 
-  const navLinks = [
-    { path: '/super-admin', label: 'Dashboard' },
-    { path: '/super-admin/user-bookings', label: 'User Bookings' },
-    { path: '/super-admin/company-analytics', label: 'Company Analytics' },
-    { path: '/super-admin/login-activity', label: 'Login Activity' },
-    { path: '/super-admin/manage-slots', label: 'Manage Slots' }
-  ];
+  const SidebarContent = ({ onLinkClick }) => (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className="px-5 pt-6 pb-5">
+        <Link to="/super-admin" onClick={onLinkClick} className="flex items-center gap-2.5">
+          <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+            <FiBriefcase className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-white font-black text-lg tracking-tight">SlotBook</span>
+          <span className="text-xs font-bold text-purple-300 bg-purple-600/50 px-2 py-0.5 rounded-full border border-purple-500/40">SUPER</span>
+        </Link>
+      </div>
 
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-900 to-indigo-900 dark:from-purple-950 dark:to-indigo-950 text-white backdrop-blur-md shadow-lg transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-        <div className="flex justify-between items-center">
-          <Link to="/super-admin" className="flex items-center hover:opacity-80 transition-opacity">
-            <Logo size="md" showText={true} />
-            <span className="ml-2 text-sm font-bold text-purple-200">SUPER ADMIN</span>
+      {/* Nav Links */}
+      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
+        {navLinks.map(({ path, label, icon: Icon }) => (
+          <Link
+            key={path}
+            to={path}
+            onClick={onLinkClick}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              isActive(path)
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/40'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Icon className="w-4 h-4 flex-shrink-0" />
+            <span>{label}</span>
+            {isActive(path) && (
+              <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70" />
+            )}
           </Link>
+        ))}
+      </nav>
 
-          {/* Desktop Menu */}
-          <div className="hidden lg:flex items-center gap-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`text-sm font-medium transition-all px-3 py-2 rounded-lg ${
-                  isActive(link.path)
-                    ? 'text-purple-200 bg-purple-700/40 border-b-2 border-purple-300'
-                    : 'text-gray-200 hover:text-purple-200 hover:bg-purple-800/30'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg bg-purple-800 hover:bg-purple-700 transition-all duration-200 text-yellow-300"
-              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-            >
-              {theme === 'light' ? <FiMoon className="w-5 h-5" /> : <FiSun className="w-5 h-5" />}
-            </button>
-
-            <div className="flex items-center gap-3 px-3 py-2 bg-purple-800/50 rounded-lg border border-purple-700">
-              <div className="w-9 h-9 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                {user?.name ? user.name.charAt(0).toUpperCase() : 'S'}
-              </div>
-              <div className="text-left min-w-0">
-                <p className="text-sm font-semibold text-white leading-tight truncate max-w-[150px]">
-                  {user?.name || user?.username || 'Super Admin'}
-                </p>
-                <p className="text-xs text-purple-200 capitalize">Super Admin</p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowLogoutModal(true)}
-              className="bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-600 transition duration-200 font-medium flex items-center gap-2"
-            >
-              <FiLogOut className="w-4 h-4" />
-              Logout
-            </button>
+      {/* Bottom */}
+      <div className="px-3 pb-4 pt-3 border-t border-white/5 space-y-2">
+        {/* User card */}
+        <div className="flex items-center gap-3 px-3 py-2.5">
+          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            {user?.name ? user.name.charAt(0).toUpperCase() : 'S'}
           </div>
-
-          {/* Mobile Menu Button */}
-          <div className="flex lg:hidden items-center gap-2">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg bg-purple-800 hover:bg-purple-700 transition-all duration-200 text-yellow-300"
-            >
-              {theme === 'light' ? <FiMoon className="w-5 h-5" /> : <FiSun className="w-5 h-5" />}
-            </button>
-            
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg bg-purple-800 hover:bg-purple-700 transition-all duration-200"
-            >
-              {mobileMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
-            </button>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-white leading-tight truncate">
+              {user?.name || user?.username || 'superadmin'}
+            </p>
+            <p className="text-xs text-slate-400">Super Admin</p>
           </div>
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+            title={theme === 'light' ? 'Dark mode' : 'Light mode'}
+          >
+            {theme === 'light' ? <FiMoon className="w-3.5 h-3.5" /> : <FiSun className="w-3.5 h-3.5" />}
+          </button>
         </div>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden mt-4 pb-4 space-y-2 border-t border-purple-700 pt-4">
-            <div className="flex items-center gap-3 px-4 py-3 bg-purple-800/50 rounded-lg mb-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
-                {user?.name ? user.name.charAt(0).toUpperCase() : 'S'}
-              </div>
-              <div className="text-left min-w-0 flex-1">
-                <p className="text-sm font-semibold text-white leading-tight truncate">
-                  {user?.name || user?.username || 'Super Admin'}
-                </p>
-                <p className="text-xs text-purple-200 capitalize">Super Admin</p>
-              </div>
-            </div>
-
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block text-sm font-medium transition-all px-4 py-3 rounded-lg ${
-                  isActive(link.path)
-                    ? 'text-purple-200 bg-purple-700/40'
-                    : 'text-gray-200 hover:text-purple-200 hover:bg-purple-800/30'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            <button
-              onClick={() => {
-                setShowLogoutModal(true);
-                setMobileMenuOpen(false);
-              }}
-              className="w-full bg-red-500 text-white px-4 py-3 rounded-lg hover:bg-red-600 transition duration-200 font-medium flex items-center justify-center gap-2"
-            >
-              <FiLogOut className="w-4 h-4" />
-              Logout
-            </button>
-          </div>
-        )}
+        {/* Logout */}
+        <button
+          onClick={() => setShowLogoutModal(true)}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-transparent border border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all text-sm font-medium"
+        >
+          <FiLogOut className="w-4 h-4" />
+          Logout
+        </button>
       </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 shadow-2xl"
+        style={{ background: 'linear-gradient(180deg, #1e1b4b 0%, #2d1b69 50%, #1e1b4b 100%)' }}>
+        <SidebarContent onLinkClick={() => {}} />
+      </aside>
+
+      {/* Mobile top bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 shadow-lg"
+        style={{ background: '#1e1b4b' }}>
+        <div className="flex items-center justify-between px-4 py-3">
+          <Link to="/super-admin" className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
+              <FiBriefcase className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="text-white font-black text-base">SlotBook</span>
+            <span className="text-xs font-bold text-purple-300 bg-purple-600/50 px-1.5 py-0.5 rounded-full">SUPER</span>
+          </Link>
+          <button onClick={() => setMobileOpen(true)} className="p-2 rounded-lg hover:bg-white/10 text-white transition-colors">
+            <FiMenu className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
+          <div className="relative w-64 h-full shadow-2xl flex flex-col"
+            style={{ background: 'linear-gradient(180deg, #1e1b4b 0%, #2d1b69 50%, #1e1b4b 100%)' }}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+              <span className="text-white font-bold">Menu</span>
+              <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 transition-colors">
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <SidebarContent onLinkClick={() => setMobileOpen(false)} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Logout Modal */}
       {showLogoutModal && (
-        <div 
-          className="fixed w-screen h-screen z-[9999] bg-black/50"
-          onClick={() => setShowLogoutModal(false)}
-          style={{ top: 0, left: 0, margin: 0, padding: 0 }}
-        >
-          <div 
-            className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full p-6"
-            style={{ 
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              maxWidth: '28rem'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4"
+          onClick={() => setShowLogoutModal(false)}>
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-sm p-6"
+            onClick={e => e.stopPropagation()}>
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
                 <FiLogOut className="h-7 w-7 text-red-600 dark:text-red-400" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Confirm Logout</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                Are you sure you want to logout?
-              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">Are you sure you want to logout?</p>
               <div className="flex gap-3">
-                <button
-                  onClick={() => setShowLogoutModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium"
-                >
+                <button onClick={() => setShowLogoutModal(false)}
+                  className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors font-medium">
                   Cancel
                 </button>
-                <button
-                  onClick={handleLogout}
-                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2"
-                >
+                <button onClick={handleLogout}
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2">
                   <FiLogOut className="w-4 h-4" />
                   Logout
                 </button>
@@ -192,7 +175,7 @@ function SuperAdminNavbar() {
           </div>
         </div>
       )}
-    </nav>
+    </>
   );
 }
 

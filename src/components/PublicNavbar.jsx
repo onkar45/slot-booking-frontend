@@ -1,12 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
 import { useContext, useState } from "react";
 import { ThemeContext } from "../context/ThemeContext";
+import { useOrg } from "../context/OrgContext";
 import { FiSun, FiMoon, FiMenu, FiX } from 'react-icons/fi';
 import Logo from './Logo';
 
 function PublicNavbar() {
   const location = useLocation();
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const { org } = useOrg();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path) => location.pathname === path;
@@ -17,7 +19,7 @@ function PublicNavbar() {
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Logo size="md" showText={true} />
+            <Logo size="md" showText={true} text={org?.name || 'SlotBook'} />
           </Link>
 
           {/* Desktop Menu */}
