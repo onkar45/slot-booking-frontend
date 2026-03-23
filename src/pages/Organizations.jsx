@@ -18,21 +18,31 @@ function CreateOrgModal({ onClose, onCreated }) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.name.trim() || !form.slug.trim()) { toast.error('Name and slug are required'); return; }
-    setLoading(true);
-    try {
-      const res = await API.post('/super-admin/organizations', {
-        name: form.name,
-        subdomain: form.slug,
-      });
-      toast.success('Organization created successfully');
-      onCreated(res.data);
-      onClose();
-    } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to create organization');
-    } finally { setLoading(false); }
-  };
+  e.preventDefault();
+
+  if (!form.name.trim() || !form.slug.trim()) {
+    toast.error('Name and slug are required');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const res = await API.post('/super-admin/organizations', {
+      name: form.name,           // ✅ FIX
+      subdomain: form.slug,      // ✅ FIX
+    });
+
+    toast.success('Organization created successfully');
+    onCreated(res.data);
+    onClose();
+
+  } catch (err) {
+    toast.error(err.response?.data?.detail || 'Failed to create organization');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
