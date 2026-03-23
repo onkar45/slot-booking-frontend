@@ -22,22 +22,17 @@ const API = axios.create({
 });
 
 API.interceptors.request.use((config) => {
-  // Attach JWT token
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  // In development only: send X-Org-Slug header (backend can't read subdomain on localhost)
-  // In production: backend reads org from Host/subdomain automatically
-  if (isLocalhost()) {
-    const orgSlug = getOrganization();
-    if (orgSlug) {
-      config.headers['X-Org-Slug'] = orgSlug;
-    }
+  // ✅ ALWAYS send org (fix)
+  const orgSlug = getOrganization();
+  if (orgSlug) {
+    config.headers['X-Org-Slug'] = orgSlug;
   }
 
-  // Clean trailing slashes
   if (config.url) {
     config.url = config.url.replace(/\/+$/, '');
   }
