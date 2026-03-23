@@ -22,7 +22,10 @@ function CreateOrgModal({ onClose, onCreated }) {
     if (!form.name.trim() || !form.slug.trim()) { toast.error('Name and slug are required'); return; }
     setLoading(true);
     try {
-      const res = await API.post('/super-admin/organizations', form);
+      const res = await API.post('/super-admin/organizations', {
+        name: form.name,
+        subdomain: form.slug,
+      });
       toast.success('Organization created successfully');
       onCreated(res.data);
       onClose();
