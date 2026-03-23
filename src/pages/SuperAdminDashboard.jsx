@@ -3,14 +3,15 @@ import { Link } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import SuperAdminNavbar from '../components/SuperAdminNavbar';
 import API from '../services/api';
-import { FiUsers, FiCalendar, FiCheckCircle, FiClock, FiTrendingUp, FiActivity } from 'react-icons/fi';
+import { FiUsers, FiCalendar, FiCheckCircle, FiClock, FiTrendingUp, FiActivity, FiBriefcase } from 'react-icons/fi';
 
 function SuperAdminDashboard() {
   const [stats, setStats] = useState({
     total_users: 0,
     total_bookings: 0,
     approved_bookings: 0,
-    pending_bookings: 0
+    pending_bookings: 0,
+    total_organizations: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -20,25 +21,24 @@ function SuperAdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      // Fetch bookings data - super admin has access to this
-      const bookingsRes = await API.get('/super-admin/user-bookings');
+      const [bookingsRes, orgsRes] = await Promise.all([
+        API.get('/super-admin/user-bookings'),
+        API.get('/super-admin/organizations'),
+      ]);
       const bookings = bookingsRes.data || [];
 
-      // Calculate unique users from bookings
       const uniqueUsers = new Set();
       bookings.forEach(booking => {
-        if (booking.user?.id) {
-          uniqueUsers.add(booking.user.id);
-        } else if (booking.user?.email) {
-          uniqueUsers.add(booking.user.email);
-        }
+        if (booking.user?.id) uniqueUsers.add(booking.user.id);
+        else if (booking.user?.email) uniqueUsers.add(booking.user.email);
       });
 
       setStats({
         total_users: uniqueUsers.size,
         total_bookings: bookings.length,
         approved_bookings: bookings.filter(b => b.status === 'approved').length,
-        pending_bookings: bookings.filter(b => b.status === 'pending').length
+        pending_bookings: bookings.filter(b => b.status === 'pending').length,
+        total_organizations: (orgsRes.data || []).length,
       });
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -53,23 +53,27 @@ function SuperAdminDashboard() {
       title: 'Total Users',
       value: stats.total_users,
       icon: FiUsers,
-      color: 'from-blue-500 to-blue-600',
       bgColor: 'bg-blue-50 dark:bg-blue-900/20',
       iconColor: 'text-blue-600 dark:text-blue-400'
+    },
+    {
+      title: 'Total Organizations',
+      value: stats.total_organizations,
+      icon: FiBriefcase,
+      bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+      iconColor: 'text-purple-600 dark:text-purple-400'
     },
     {
       title: 'Total Bookings',
       value: stats.total_bookings,
       icon: FiCalendar,
-      color: 'from-purple-500 to-purple-600',
-      bgColor: 'bg-purple-50 dark:bg-purple-900/20',
-      iconColor: 'text-purple-600 dark:text-purple-400'
+      bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
+      iconColor: 'text-indigo-600 dark:text-indigo-400'
     },
     {
       title: 'Approved Bookings',
       value: stats.approved_bookings,
       icon: FiCheckCircle,
-      color: 'from-green-500 to-emerald-600',
       bgColor: 'bg-green-50 dark:bg-green-900/20',
       iconColor: 'text-green-600 dark:text-green-400'
     },
@@ -77,7 +81,6 @@ function SuperAdminDashboard() {
       title: 'Pending Bookings',
       value: stats.pending_bookings,
       icon: FiClock,
-      color: 'from-yellow-500 to-orange-600',
       bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
       iconColor: 'text-yellow-600 dark:text-yellow-400'
     }
@@ -140,7 +143,7 @@ function SuperAdminDashboard() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
               {statCards.map((stat, index) => (
                 <div
                   key={index}
