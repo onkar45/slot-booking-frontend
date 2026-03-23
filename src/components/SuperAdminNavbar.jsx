@@ -1,5 +1,5 @@
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { ThemeContext } from "../context/ThemeContext";
 import toast from 'react-hot-toast';
@@ -123,29 +123,25 @@ function SuperAdminNavbar() {
             <span className="text-white font-black text-base">SlotBook</span>
             <span className="text-xs font-bold text-purple-300 bg-purple-600/50 px-1.5 py-0.5 rounded-full">SUPER</span>
           </Link>
-          <button onClick={() => setMobileOpen(true)} className="p-2 rounded-lg hover:bg-white/10 text-white transition-colors">
-            <FiMenu className="w-5 h-5" />
+          <button onClick={() => setMobileOpen(o => !o)} className="p-2 rounded-lg hover:bg-white/10 text-white transition-colors">
+            {mobileOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
           </button>
+        </div>
+
+        {/* Drop-down panel */}
+        <div
+          className="overflow-hidden transition-all duration-300 ease-in-out"
+          style={{ maxHeight: mobileOpen ? '100vh' : '0px' }}
+        >
+          <div style={{ background: 'linear-gradient(180deg, #1e1b4b 0%, #2d1b69 100%)' }}>
+            <SidebarContent onLinkClick={() => setMobileOpen(false)} />
+          </div>
         </div>
       </div>
 
-      {/* Mobile drawer */}
+      {/* Backdrop */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
-          <div className="relative w-64 h-full shadow-2xl flex flex-col"
-            style={{ background: 'linear-gradient(180deg, #1e1b4b 0%, #2d1b69 50%, #1e1b4b 100%)' }}>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
-              <span className="text-white font-bold">Menu</span>
-              <button onClick={() => setMobileOpen(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 transition-colors">
-                <FiX className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              <SidebarContent onLinkClick={() => setMobileOpen(false)} />
-            </div>
-          </div>
-        </div>
+        <div className="lg:hidden fixed inset-0 z-30 bg-black/40 top-14" onClick={() => setMobileOpen(false)} />
       )}
 
       {/* Logout Modal */}

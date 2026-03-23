@@ -187,7 +187,7 @@ function Organizations() {
   const noAdmin     = orgs.filter(o => !o.admin_email).length;
 
   return (
-    <div className="min-h-screen lg:ml-56 pt-14 lg:pt-0" style={{ background: '#f0f2f8' }}>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 lg:ml-56 pt-14 lg:pt-0">
       <Toaster position="top-right" />
       <SuperAdminNavbar />
 
@@ -205,9 +205,9 @@ function Organizations() {
           <div>
             <div className="flex items-center gap-3 mb-1">
               <FiBriefcase className="w-7 h-7 text-purple-600" />
-              <h1 className="text-2xl font-black text-gray-900">Organizations</h1>
+              <h1 className="text-2xl font-black text-gray-900 dark:text-white">Organizations</h1>
             </div>
-            <p className="text-sm text-gray-500 ml-10">Manage all tenant organizations</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 ml-10">Manage all tenant organizations</p>
           </div>
           <button
             onClick={() => setShowCreateOrg(true)}
@@ -221,48 +221,48 @@ function Organizations() {
         {/* Stat cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           {/* Total */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
             <div className="flex items-start gap-4">
-              <div className="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <FiBriefcase className="w-5 h-5 text-purple-600" />
+              <div className="w-11 h-11 bg-purple-100 dark:bg-purple-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                <FiBriefcase className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium mb-0.5">Total Organizations</p>
-                <p className="text-3xl font-black text-gray-900">{totalOrgs}</p>
-                <p className="text-xs text-gray-400 mt-1">All registered organizations</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-0.5">Total Organizations</p>
+                <p className="text-3xl font-black text-gray-900 dark:text-white">{totalOrgs}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">All registered organizations</p>
               </div>
             </div>
           </div>
           {/* With Admin */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border-t-4 border-green-500">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border-t-4 border-green-500">
             <div className="flex items-start gap-4">
-              <div className="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <FiUsers className="w-5 h-5 text-green-600" />
+              <div className="w-11 h-11 bg-green-100 dark:bg-green-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                <FiUsers className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium mb-0.5">With Admin</p>
-                <p className="text-3xl font-black text-gray-900">{withAdmin}</p>
-                <p className="text-xs text-gray-400 mt-1">Organizations with assigned admin</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-0.5">With Admin</p>
+                <p className="text-3xl font-black text-gray-900 dark:text-white">{withAdmin}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Organizations with assigned admin</p>
               </div>
             </div>
           </div>
           {/* No Admin */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border-t-4 border-red-400">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border-t-4 border-red-400">
             <div className="flex items-start gap-4">
-              <div className="w-11 h-11 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <FiAlertTriangle className="w-5 h-5 text-red-500" />
+              <div className="w-11 h-11 bg-red-100 dark:bg-red-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                <FiAlertTriangle className="w-5 h-5 text-red-500 dark:text-red-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium mb-0.5">No Admin Assigned</p>
-                <p className="text-3xl font-black text-gray-900">{noAdmin}</p>
-                <p className="text-xs text-gray-400 mt-1">Organizations needing admin</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-0.5">No Admin Assigned</p>
+                <p className="text-3xl font-black text-gray-900 dark:text-white">{noAdmin}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Organizations needing admin</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Search + filter bar */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3 mb-4 flex flex-col sm:flex-row gap-3 items-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 px-4 py-3 mb-4 flex flex-col sm:flex-row gap-3 items-center">
           <div className="flex-1 relative w-full">
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -270,20 +270,20 @@ function Organizations() {
               placeholder="Search organizations by name or slug..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
             />
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <select
               value={adminFilter}
               onChange={e => setAdminFilter(e.target.value)}
-              className="px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm font-medium"
+              className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm font-medium"
             >
               <option value="all">All Organizations</option>
               <option value="has_admin">Has Admin</option>
               <option value="no_admin">No Admin</option>
             </select>
-            <button onClick={fetchOrgs} className="p-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors">
+            <button onClick={fetchOrgs} className="p-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
               <FiRefreshCw className="w-4 h-4" />
             </button>
           </div>
@@ -295,42 +295,42 @@ function Organizations() {
             <div className="animate-spin rounded-full h-10 w-10 border-4 border-purple-600 border-t-transparent" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm p-12 text-center border border-gray-100">
-            <FiBriefcase className="w-14 h-14 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 font-medium">No organizations found</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-12 text-center border border-gray-100 dark:border-gray-700">
+            <FiBriefcase className="w-14 h-14 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400 font-medium">No organizations found</p>
             <button onClick={() => setShowCreateOrg(true)} className="mt-4 px-5 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 font-medium text-sm transition-colors">
               Create First Organization
             </button>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="text-left py-3.5 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Organization</th>
-                    <th className="text-left py-3.5 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Slug</th>
-                    <th className="text-left py-3.5 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Admin</th>
-                    <th className="text-left py-3.5 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Created</th>
-                    <th className="text-left py-3.5 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
-                    <th className="text-left py-3.5 px-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
+                  <tr className="border-b border-gray-100 dark:border-gray-700">
+                    <th className="text-left py-3.5 px-5 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Organization</th>
+                    <th className="text-left py-3.5 px-5 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Slug</th>
+                    <th className="text-left py-3.5 px-5 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Admin</th>
+                    <th className="text-left py-3.5 px-5 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Created</th>
+                    <th className="text-left py-3.5 px-5 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="text-left py-3.5 px-5 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                   {filtered.map(org => (
-                    <tr key={org.id} className="hover:bg-gray-50/60 transition-colors">
+                    <tr key={org.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-700/40 transition-colors">
                       {/* Org name */}
                       <td className="py-4 px-5">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                             {org.name?.charAt(0).toUpperCase()}
                           </div>
-                          <span className="font-semibold text-gray-900 text-sm">{org.name}</span>
+                          <span className="font-semibold text-gray-900 dark:text-white text-sm">{org.name}</span>
                         </div>
                       </td>
                       {/* Slug */}
                       <td className="py-4 px-5">
-                        <code className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-mono">
+                        <code className="px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg text-xs font-mono">
                           {org.slug || org.subdomain}
                         </code>
                       </td>
@@ -338,23 +338,23 @@ function Organizations() {
                       <td className="py-4 px-5">
                         {org.admin_email ? (
                           <div>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Active</span>
-                            <p className="text-xs text-gray-400 mt-1">{org.admin_email}</p>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">Active</span>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{org.admin_email}</p>
                           </div>
                         ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">No Admin Assigned</span>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400">No Admin Assigned</span>
                         )}
                       </td>
                       {/* Created */}
                       <td className="py-4 px-5">
-                        <span className="text-sm text-gray-500">{formatDate(org.created_at)}</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">{formatDate(org.created_at)}</span>
                       </td>
                       {/* Status */}
                       <td className="py-4 px-5">
                         {org.is_active !== false ? (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Active</span>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400">Active</span>
                         ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">Inactive</span>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">Inactive</span>
                         )}
                       </td>
                       {/* Actions */}
@@ -363,7 +363,7 @@ function Organizations() {
                           <button
                             onClick={() => setCreateAdminFor(org)}
                             title="Assign Admin"
-                            className="p-2 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors"
+                            className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
                           >
                             <FiUserPlus className="w-3.5 h-3.5" />
                           </button>
@@ -373,8 +373,8 @@ function Organizations() {
                             title={org.is_active !== false ? 'Deactivate' : 'Activate'}
                             className={`p-2 rounded-lg transition-colors disabled:opacity-50 ${
                               org.is_active !== false
-                                ? 'bg-red-50 text-red-500 hover:bg-red-100'
-                                : 'bg-green-50 text-green-600 hover:bg-green-100'
+                                ? 'bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50'
+                                : 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50'
                             }`}
                           >
                             {togglingId === org.id
@@ -389,7 +389,7 @@ function Organizations() {
                 </tbody>
               </table>
             </div>
-            <div className="px-5 py-3 border-t border-gray-100 text-xs text-gray-400">
+            <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-400 dark:text-gray-500">
               Showing {filtered.length} of {orgs.length} organizations
             </div>
           </div>
