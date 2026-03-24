@@ -56,18 +56,24 @@
 .slot-expired {
   background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
   color: #6b7280;
-}
-
-.slot-expired-booked {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-  color: white;
-}
   font-weight: 600;
   border-radius: 6px;
   padding: 0.5rem;
   cursor: not-allowed;
   opacity: 0.7;
   box-shadow: 0 1px 3px rgba(156, 163, 175, 0.2);
+  font-size: 0.75rem;
+  border: none;
+}
+
+.slot-expired-booked {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: not-allowed;
+  opacity: 0.85;
   font-size: 0.75rem;
   border: none;
 }
