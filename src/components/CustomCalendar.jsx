@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useRef } from 'react';
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiChevronLeft, FiChevronRight, FiAlertTriangle } from 'react-icons/fi';
 import API from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -220,9 +220,9 @@ function CustomCalendar({ onOpenBookingModal }) {
 
           let status = 'available';
           if (isUnavailableDay) status = 'unavailable';
+          else if (isExpired) status = 'expired';        // expired takes priority over booked
           else if (isBlocked) status = 'blocked';
           else if (isBooked) status = 'booked';
-          else if (isExpired) status = 'expired';
 
           allSlots.push({
             date: dateStr,
@@ -267,7 +267,17 @@ function CustomCalendar({ onOpenBookingModal }) {
       return;
     }
     if (slot.status === 'blocked') {
-      toast.error('This date has been blocked by admin');
+      const dateLabel = new Date(slot.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+      toast(`🚫 ${dateLabel} is blocked by admin — no bookings available.`, {
+        duration: 3500,
+        style: {
+          background: '#fef3c7',
+          color: '#92400e',
+          border: '1px solid #fcd34d',
+          fontWeight: '500',
+          fontSize: '13px',
+        },
+      });
       return;
     }
     if (slot.status === 'booked') {
@@ -310,6 +320,27 @@ function CustomCalendar({ onOpenBookingModal }) {
       setCurrentWeekStart(currentWeekStart + 7);
     }
   }
+
+  // Toast notification when visible week has blocked days
+  useEffect(() => {
+    if (events.length === 0 || blockedDates.length === 0) return;
+    const days = getVisibleDays();
+    const blockedVisible = days.filter(d => blockedDates.includes(d.dateStr));
+    if (blockedVisible.length === 0) return;
+    const names = blockedVisible
+      .map(d => d.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }))
+      .join(', ');
+    toast(`⚠️ Blocked: ${names} — no bookings on these days.`, {
+      duration: 4000,
+      style: {
+        background: '#fef3c7',
+        color: '#92400e',
+        border: '1px solid #fcd34d',
+        fontWeight: '500',
+        fontSize: '13px',
+      },
+    });
+  }, [currentWeekStart, blockedDates, events.length]);
 
   function formatDateHeader(date) {
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -388,6 +419,24 @@ function CustomCalendar({ onOpenBookingModal }) {
           <FiChevronRight className="w-5 h-5" />
         </button>
       </div>
+
+      {/* Blocked day inline banner + toast */}
+      {(() => {
+        const blockedVisible = visibleDays.filter(d => blockedDates.includes(d.dateStr));
+        if (blockedVisible.length === 0) return null;
+        const names = blockedVisible.map(d =>
+          d.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+        ).join(', ');
+        return (
+          <div className="mb-3 flex items-start gap-2.5 px-3 py-2.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl text-xs text-amber-800 dark:text-amber-300">
+            <FiAlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-amber-500" />
+            <span>
+              <span className="font-semibold">Blocked dates this week: </span>
+              {names} — no bookings available on these days.
+            </span>
+          </div>
+        );
+      })()}
 
       {/* Calendar Grid */}
       <div className="overflow-x-auto calendar-scroll -mx-4 px-4">
