@@ -510,7 +510,7 @@ function CustomCalendar({ onOpenBookingModal }) {
                       slotClass = 'slot-expired';
                       displayText = 'Expired';
                     } else if (slot.status === 'expired-booked') {
-                      slotClass = 'slot-expired';
+                      slotClass = 'slot-expired-booked';
                       displayText = 'Expired (Booked)';
                     }
 
