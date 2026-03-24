@@ -220,7 +220,8 @@ function CustomCalendar({ onOpenBookingModal }) {
 
           let status = 'available';
           if (isUnavailableDay) status = 'unavailable';
-          else if (isExpired) status = 'expired';        // expired takes priority over booked
+          else if (isExpired && isBooked) status = 'expired-booked';
+          else if (isExpired) status = 'expired';
           else if (isBlocked) status = 'blocked';
           else if (isBooked) status = 'booked';
 
@@ -284,7 +285,7 @@ function CustomCalendar({ onOpenBookingModal }) {
       toast.error('Slot is already booked');
       return;
     }
-    if (slot.status === 'expired') {
+    if (slot.status === 'expired' || slot.status === 'expired-booked') {
       toast.error('This time slot has expired');
       return;
     }
@@ -508,6 +509,9 @@ function CustomCalendar({ onOpenBookingModal }) {
                     } else if (slot.status === 'expired') {
                       slotClass = 'slot-expired';
                       displayText = 'Expired';
+                    } else if (slot.status === 'expired-booked') {
+                      slotClass = 'slot-expired';
+                      displayText = 'Expired (Booked)';
                     }
 
                     return (
