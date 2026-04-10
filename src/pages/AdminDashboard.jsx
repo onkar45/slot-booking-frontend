@@ -11,6 +11,9 @@ function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('latest');
   const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState('all');
+  const [customDateFrom, setCustomDateFrom] = useState('');
+  const [customDateTo, setCustomDateTo] = useState('');
   
   // Block Date States
   const [blockedDates, setBlockedDates] = useState([]);
@@ -52,6 +55,35 @@ function AdminDashboard() {
     };
   }, [bookings]);
 
+  // Date filter helper
+  const getDateRange = (filter) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+    switch (filter) {
+      case 'today':    return { start: today, end: tomorrow };
+      case 'tomorrow': return { start: tomorrow, end: new Date(tomorrow.getTime() + 86400000) };
+      case 'week': {
+        const end = new Date(today); end.setDate(today.getDate() + 7);
+        return { start: today, end };
+      }
+      case 'month': {
+        const end = new Date(today); end.setDate(today.getDate() + 30);
+        return { start: today, end };
+      }
+      case 'custom': {
+        if (!customDateFrom || !customDateTo) return null;
+        // Parse as local dates to avoid UTC offset issues
+        const [fy, fm, fd] = customDateFrom.split('-').map(Number);
+        const [ty, tm, td] = customDateTo.split('-').map(Number);
+        const start = new Date(fy, fm - 1, fd);
+        const end = new Date(ty, tm - 1, td + 1); // inclusive end
+        return { start, end };
+      }
+      default: return null;
+    }
+  };
+
   // Filter, search, and sort bookings
   const filteredAndSortedBookings = useMemo(() => {
     let result = [...bookings];
@@ -59,6 +91,21 @@ function AdminDashboard() {
     // Apply status filter
     if (statusFilter !== 'all') {
       result = result.filter(b => b.status === statusFilter);
+    }
+
+    // Apply date filter
+    if (dateFilter !== 'all') {
+      const range = getDateRange(dateFilter);
+      if (range) {
+        result = result.filter(b => {
+          const raw = b.booking_date || b.date || b.created_at;
+          if (!raw) return false;
+          // Normalize to local midnight for date-only fields
+          const dateStr = raw.includes('T') ? raw : raw + 'T00:00:00';
+          const d = new Date(dateStr);
+          return d >= range.start && d < range.end;
+        });
+      }
     }
 
     // Apply search filter
@@ -78,7 +125,7 @@ function AdminDashboard() {
     });
 
     return result;
-  }, [bookings, statusFilter, searchQuery, sortOrder]);
+  }, [bookings, statusFilter, searchQuery, sortOrder, dateFilter, customDateFrom, customDateTo]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredAndSortedBookings.length / ITEMS_PER_PAGE);
@@ -89,7 +136,7 @@ function AdminDashboard() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, searchQuery, sortOrder]);
+  }, [statusFilter, searchQuery, sortOrder, dateFilter, customDateFrom, customDateTo]);
 
   const goToPage = (page) => {
     setCurrentPage(page);
@@ -340,25 +387,65 @@ function AdminDashboard() {
             </button>
           </div>
 
-          {/* Search and Sort */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Search Bar */}
-            <div className="flex-1 relative">
-              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
+          {/* Search + Date filters + Sort — single row */}
+          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+            {/* Search Bar — takes remaining space */}
+            <div className="relative flex-1">
+              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search by username..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-2xl border border-white/20 dark:border-gray-700/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/20 dark:border-gray-700/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium shadow-lg"
               />
             </div>
 
-            {/* Sort Dropdown */}
+            {/* Date filter */}
+            <select
+              value={dateFilter}
+              onChange={(e) => { setDateFilter(e.target.value); setCustomDateFrom(''); setCustomDateTo(''); }}
+              className="px-3 py-2.5 rounded-xl border border-white/20 dark:border-gray-700/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium shadow-lg"
+            >
+              <option value="all">All Time</option>
+              <option value="today">Today</option>
+              <option value="tomorrow">Tomorrow</option>
+              <option value="week">This Week</option>
+              <option value="custom">Custom Range</option>
+            </select>
+
+            {/* Custom date inputs — only when custom selected */}
+            {dateFilter === 'custom' && (
+              <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-700/50 border border-white/20 dark:border-gray-700/20 rounded-xl px-3 py-1.5 shadow-lg">
+                <FiCalendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium leading-none mb-0.5">From</span>
+                  <input
+                    type="date"
+                    value={customDateFrom}
+                    onChange={(e) => setCustomDateFrom(e.target.value)}
+                    className="bg-transparent text-gray-800 dark:text-gray-200 text-sm font-medium focus:outline-none w-32"
+                  />
+                </div>
+                <span className="text-gray-300 dark:text-gray-600 text-sm">—</span>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium leading-none mb-0.5">To</span>
+                  <input
+                    type="date"
+                    value={customDateTo}
+                    min={customDateFrom}
+                    onChange={(e) => setCustomDateTo(e.target.value)}
+                    className="bg-transparent text-gray-800 dark:text-gray-200 text-sm font-medium focus:outline-none w-32"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Sort */}
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="px-6 py-4 rounded-2xl border border-white/20 dark:border-gray-700/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+              className="px-3 py-2.5 rounded-xl border border-white/20 dark:border-gray-700/20 bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium shadow-lg"
             >
               <option value="latest">Latest First</option>
               <option value="oldest">Oldest First</option>
