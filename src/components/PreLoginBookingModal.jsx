@@ -95,23 +95,23 @@ function PreLoginBookingModal({ isOpen, onClose, selectedDate, selectedTime }) {
     }
 
     if (!formData.companyName.trim()) {
-      newErrors.companyName = 'Company name is required';
+      // HIDDEN FIELD - remove comment to restore validation
     }
 
     if (!formData.hrName.trim()) {
-      newErrors.hrName = 'HR name is required';
+      // HIDDEN FIELD - remove comment to restore validation
     }
 
     if (!formData.mobileNumber.trim()) {
-      newErrors.mobileNumber = 'Mobile number is required';
+      // HIDDEN FIELD - remove comment to restore validation
     } else if (!/^\d{10}$/.test(formData.mobileNumber.trim())) {
-      newErrors.mobileNumber = 'Please enter a valid 10-digit mobile number';
+      // HIDDEN FIELD - remove comment to restore validation
     }
 
     if (!formData.emailId.trim()) {
-      newErrors.emailId = 'Email ID is required';
+      // HIDDEN FIELD - remove comment to restore validation
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailId.trim())) {
-      newErrors.emailId = 'Please enter a valid email address';
+      // HIDDEN FIELD - remove comment to restore validation
     }
 
     if (!formData.description.trim()) {
@@ -250,7 +250,8 @@ function PreLoginBookingModal({ isOpen, onClose, selectedDate, selectedTime }) {
               </select>
             </div>
 
-            {/* New Fields Section */}
+            {/* HIDDEN FIELDS - remove 'false &&' to restore */}
+            {false && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Company Name */}
               <div>
@@ -304,7 +305,9 @@ function PreLoginBookingModal({ isOpen, onClose, selectedDate, selectedTime }) {
                 )}
               </div>
             </div>
+            )}
 
+            {false && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Mobile Number */}
               <div>
@@ -359,6 +362,7 @@ function PreLoginBookingModal({ isOpen, onClose, selectedDate, selectedTime }) {
                 )}
               </div>
             </div>
+            )}
 
             {/* Description Textarea */}
             <div>

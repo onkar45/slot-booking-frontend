@@ -124,23 +124,23 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
     }
 
     if (!formData.companyName.trim()) {
-      newErrors.companyName = 'Company name is required';
+      // HIDDEN FIELD - remove comment to restore validation
     }
 
     if (!formData.hrName.trim()) {
-      newErrors.hrName = 'HR name is required';
+      // HIDDEN FIELD - remove comment to restore validation
     }
 
     if (!formData.mobileNumber.trim()) {
-      newErrors.mobileNumber = 'Mobile number is required';
+      // HIDDEN FIELD - remove comment to restore validation
     } else if (!/^\d{10}$/.test(formData.mobileNumber.trim())) {
-      newErrors.mobileNumber = 'Please enter a valid 10-digit mobile number';
+      // HIDDEN FIELD - remove comment to restore validation
     }
 
     if (!formData.emailId.trim()) {
-      newErrors.emailId = 'Email ID is required';
+      // HIDDEN FIELD - remove comment to restore validation
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailId.trim())) {
-      newErrors.emailId = 'Please enter a valid email address';
+      // HIDDEN FIELD - remove comment to restore validation
     }
 
     setErrors(newErrors);
@@ -385,7 +385,8 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
               </select>
             </div>
 
-            {/* New Fields Section */}
+            {/* HIDDEN FIELDS - remove 'false &&' to restore */}
+            {false && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Company Name */}
               <div>
@@ -439,7 +440,9 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
                 )}
               </div>
             </div>
+            )}
 
+            {false && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Mobile Number */}
               <div>
@@ -494,6 +497,7 @@ function BookingModal({ isOpen, onClose, onBookingSuccess, selectedDate, selecte
                 )}
               </div>
             </div>
+            )}
 
             {/* Description Textarea */}
             <div>
